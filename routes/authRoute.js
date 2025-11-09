@@ -6,7 +6,7 @@ const router = express.Router();
 const { User, Laporan } = require("../models"); 
 
 // --- 2. IMPOR MIDDLEWARE ---
-const upload = require('../middleware/UploadMiddleware');
+const upload = require('../middleware/UploadMiddleware'); // Middleware Multer
 const verifyToken = require ('../middleware/ValidTokenMiddleware'); // Middleware Otentikasi
 const role = require("../middleware/CheckRoleMiddleware"); // Middleware Otorisasi
 
@@ -67,7 +67,7 @@ router.post(
     "/update-profile", 
     verifyToken, 
     role.checkRole("user"), 
-    upload.single("foto"), // Sekarang aman
+    upload.single("foto"), 
     authControllerInstance.updateProfile
 );
 
