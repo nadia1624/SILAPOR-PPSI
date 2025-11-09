@@ -6,7 +6,8 @@ const router = express.Router();
 const { User, Laporan } = require("../models"); 
 
 // --- 2. IMPOR MIDDLEWARE ---
-const upload = require('../middleware/UploadMiddleware'); // Middleware Multer
+const UploadMiddleware = require("../middleware/UploadMiddleware"); // Import kelas
+const upload = new UploadMiddleware().getUploader(); 
 const verifyToken = require ('../middleware/ValidTokenMiddleware'); // Middleware Otentikasi
 const role = require("../middleware/CheckRoleMiddleware"); // Middleware Otorisasi
 

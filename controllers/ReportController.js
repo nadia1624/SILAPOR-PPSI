@@ -69,6 +69,8 @@ class ReportController {
             return res.status(400).json({ success: false, message: "Semua field wajib diisi" });
         }
 
+        const statusLaporan = isAdmin ? "On Progress" : "Waiting for upload verification";
+
         const reportData = {
             email: userEmail,
             jenis_laporan,
@@ -76,7 +78,7 @@ class ReportController {
             lokasi: lokasi_kejadian,
             deskripsi,
             foto_barang: req.file ? req.file.filename : null,
-            status: "Waiting for upload verification",
+            status: statusLaporan,
             tanggal_kejadian: new Date(tanggal_kejadian),
             tanggal_laporan: new Date(),
         };
@@ -170,6 +172,13 @@ class ReportController {
         }
 
         try {
+            const claimRecord = await this.Claim.findOne({ where: { id_laporan: id_laporan, status: "Waiting for approval" } });
+
+            if (!claimRecord) return res.status(404).json({ success: false, message: "Claim tidak ditemukan atau sudah diproses" });
+
+            claimRecord.status = "Done";
+            await claimRecord.save();
+            
             const laporan = await this.Laporan.findByPk(id_laporan);
             if (!laporan) return res.status(404).json({ success: false, message: "Laporan tidak ditemukan" });
             
@@ -201,21 +210,37 @@ class ReportController {
     async #processReapplyReport(req, res, isAdmin = false) {
         const { id_laporan } = req.params;
         const redirectPath = isAdmin ? "/admin/my-reports" : "/mahasiswa/my-reports";
-        
+
         try {
-            const laporan = await this.Laporan.findByPk(id_laporan);
-            if (!laporan) return res.status(404).send("Laporan tidak ditemukan");
-            
-            laporan.status = "Waiting for upload verification";
-            laporan.alasan = null; // Hapus alasan penolakan
-            await laporan.save();
-            
-            res.redirect(redirectPath);
-        } catch (error) {
-            console.error("Error mengajukan ulang laporan:", error);
-            res.status(500).send("Terjadi kesalahan pada server");
+        const laporan = await this.Laporan.findByPk(id_laporan);
+        if (!laporan) return res.status(404).send("Laporan tidak ditemukan");
+
+        // Ambil data body dari form
+        const { nama_barang, lokasi, deskripsi } = req.body;
+
+        // Update data laporan
+        laporan.nama_barang = nama_barang || laporan.nama_barang;
+        laporan.lokasi = lokasi || laporan.lokasi;
+        laporan.deskripsi = deskripsi || laporan.deskripsi;
+
+        // Jika ada upload file baru
+        if (req.file) {
+            laporan.foto_barang = req.file.filename;
         }
+
+        // Reset status dan alasan
+        laporan.status = "Waiting for upload verification";
+        laporan.alasan = null;
+
+        await laporan.save();
+
+        res.redirect(redirectPath);
+    } catch (error) {
+        console.error("Error mengajukan ulang laporan:", error);
+        res.status(500).send("Terjadi kesalahan pada server");
     }
+}
+
 
     // --- CONTROLLER METHODS (Public) ---
 

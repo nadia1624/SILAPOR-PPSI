@@ -37,7 +37,7 @@ class ClaimController {
         // Memformat data agar laporan berisi data Claim di dalamnya
         const reports = claims.map((claim) => {
             const laporan = claim.Laporan.toJSON();
-            laporan.Claim = claim.toJSON(); // Simpan objek Claim di dalam objek Laporan
+            laporan.Claim = claim.toJSON(); 
             return laporan;
         });
 

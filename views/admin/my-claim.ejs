@@ -130,16 +130,25 @@
                 >
                   <i class="fas fa-eye mr-2"></i>Detail
                 </button>
-
+                <% if (report.Claim.status === "Waiting for approval") { %>
                 <button
-                  type="button"
-                  class="flex-1 bg-red-100 hover:bg-red-200 text-red-600 py-2.5 px-4 rounded-xl font-semibold text-sm transition-all duration-200 shadow-md hover:shadow-lg"
-                  data-id="<%= report.id_laporan %>"
-                  data-nama="<%= report.nama_barang %>"
-                  onclick="openCancelModal(this)"
-                >
-                  <i class="fas fa-trash-alt mr-2"></i>Batal Klaim
-                </button>
+                type="button"
+                class="flex-1 bg-red-500 hover:bg-red-200 text-white py-2.5 px-4 rounded-xl font-semibold text-sm transition-all duration-200 shadow-md hover:shadow-lg"
+                data-id="<%= report.id_laporan %>"
+                data-nama="<%= report.nama_barang %>"
+                onclick="openCancelModal(this)"
+              >
+                <i class="fas fa-trash-alt mr-2"></i>Batal Klaim
+              </button>
+              <% } else { %>
+              <button
+                type="button"
+                class="flex-1 bg-gray-300 text-gray-600 py-2.5 px-4 rounded-xl font-semibold text-sm cursor-not-allowed"
+                disabled
+              >
+                <i class="fas fa-trash-alt mr-2"></i>Batal Klaim
+              </button>
+              <% } %>
               </div>
             </div>
           </div>
@@ -332,7 +341,7 @@
         const modalContent = modal.querySelector(".modal-content");
 
         document.getElementById("modalItemName").textContent = nama;
-        document.getElementById("cancelForm").action = "/admin/cancel/" + id;
+        document.getElementById("cancelForm").action = "/admin/my-claim/cancel/" + id;
 
       
         modal.classList.remove("hidden");

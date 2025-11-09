@@ -6,7 +6,8 @@ const router = express.Router();
 const { Laporan, User, Claim } = require("../models"); 
 
 // --- 2. IMPOR MIDDLEWARE ---
-const upload = require("../middleware/UploadMiddleware");
+const UploadMiddleware = require("../middleware/UploadMiddleware"); // Import kelas
+const upload = new UploadMiddleware().getUploader(); 
 const verifyToken = require("../middleware/ValidTokenMiddleware");
 const role = require("../middleware/CheckRoleMiddleware");
 
@@ -60,6 +61,7 @@ router.post(
   "/my-reports/reapply-report/:id_laporan",
   verifyToken,
   role.checkRole("user"),
+  upload.single("foto_barang"),
   reportControllerInstance.reapplyReport
 );
 

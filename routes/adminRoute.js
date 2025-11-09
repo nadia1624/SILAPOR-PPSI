@@ -4,7 +4,8 @@ const path = require("path");
 
 const { Laporan, User, Claim } = require("../models"); 
 
-const upload = require("../middleware/UploadMiddleware"); 
+const UploadMiddleware = require("../middleware/UploadMiddleware"); // Import kelas
+const upload = new UploadMiddleware().getUploader(); 
 const verifyToken = require("../middleware/ValidTokenMiddleware"); 
 const role = require("../middleware/CheckRoleMiddleware"); 
 
