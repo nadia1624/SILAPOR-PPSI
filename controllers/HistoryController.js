@@ -54,21 +54,35 @@ class HistoryController {
     // --- CONTROLLER METHODS (Public) ---
 
     async getDoneReports(req, res) {
-        try {
-            const reports = await this.#getFilteredReports(req.query);
-            const user = await this.User.findOne({ where: { email: req.user.email } });
+    try {
+        
+        const user = await this.User.findOne({ where: { email: req.user.email } });
+        if (!user) return res.status(404).send("User tidak ditemukan");
 
-            res.render("user/history", { 
-                reports, 
-                user,
-                filterJenis: req.query.filterJenis, 
-                searchNama: req.query.searchNama 
-            });
-        } catch (err) {
-            console.error("Error getDoneReports:", err);
-            res.status(500).send("Terjadi kesalahan saat mengambil laporan");
-        }
+        const reports = await this.Laporan.findAll({
+            where: {
+                email: user.email, 
+                status: "Done",    
+                ...(req.query.filterJenis && { jenis_laporan: req.query.filterJenis }),
+                ...(req.query.searchNama && { nama_barang: { [Op.like]: `%${req.query.searchNama}%` } })
+            },
+            include: [{ model: this.User }],
+            order: [['createdAt', 'DESC']]
+        });
+
+        res.render("user/history", {
+            reports,
+            user,
+            filterJenis: req.query.filterJenis,
+            searchNama: req.query.searchNama
+        });
+
+    } catch (err) {
+        console.error("Error getDoneReports:", err);
+        res.status(500).send("Terjadi kesalahan saat mengambil laporan");
     }
+}
+
 
     async getDoneReportsAdmin(req, res) {
         try {
