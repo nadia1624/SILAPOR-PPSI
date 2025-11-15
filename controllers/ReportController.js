@@ -288,25 +288,25 @@ class ReportController {
         }
     }
 
-    async getAdminReports(req, res) {
-        try {
-            const adminEmail = req.user.email;
-            
-            // Filter hanya laporan yang dibuat oleh admin ini
-            const reports = await this.#getReportsWithIncludes({ email: adminEmail });
-            const user = await this.User.findOne({ where: { email: adminEmail } });
+        async getAdminReports(req, res) {
+            try {
+                const adminEmail = req.user.email;
+                
+                // Filter hanya laporan yang dibuat oleh admin ini
+                const reports = await this.getReportsWithIncludes({ email: adminEmail });
+                const user = await this.User.findOne({ where: { email: adminEmail } });
 
-            res.render("admin/my-reports", { title: "Laporan Saya - Admin", reports, user, success: req.query.success });
-        } catch (error) {
-            console.error("Error getting admin reports:", error);
-            res.status(500).render("error", { message: "Terjadi kesalahan saat memuat data laporan" });
+                res.render("admin/my-reports", { title: "Laporan Saya - Admin", reports, user, success: req.query.success });
+            } catch (error) {
+                console.error("Error getting admin reports:", error);
+                res.status(500).render("error", { message: "Terjadi kesalahan saat memuat data laporan" });
+            }
         }
-    }
 
     async getAllReportsUser(req, res) {
         try {
             // Tampilkan laporan untuk user umum/non-admin (Status On Progress)
-            const reports = await this.#getReportsWithIncludes({ status: "On Progress" });
+            const reports = await this.getReportsWithIncludes({ status: "On Progress" });
             const user = req.user && req.user.email ? await this.User.findOne({ where: { email: req.user.email } }) : null;
 
             res.render("home", { reports, user });
@@ -319,7 +319,7 @@ class ReportController {
     async getAllReportsAdmin(req, res) {
         try {
             // Tampilkan laporan untuk admin (Status On Progress)
-            const reports = await this.#getReportsWithIncludes({ status: "On Progress" });
+            const reports = await this.getReportsWithIncludes({ status: "On Progress" });
             const user = await this.User.findOne({ where: { email: req.user.email } });
 
             res.render("admin/report", { reports, user });

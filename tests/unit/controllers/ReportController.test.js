@@ -59,206 +59,573 @@ describe("ReportController Unit Tests", () => {
       json: jest.fn(),
       redirect: jest.fn(),
       render: jest.fn(),
+       send: jest.fn(), 
     };
 
     jest.clearAllMocks();
   });
 
-  // -------------------- SHOW FORM --------------------
-  // describe("showReportForm & showAdminReportForm", () => {
-  //   it("should render report form for user", () => {
-  //     controller.showReportForm(req, res);
-  //     expect(res.render).toHaveBeenCalledWith("report-form", { title: "Form Laporan", role: "user" });
-  //   });
 
-  //   it("should render report form for admin", () => {
-  //     req.user.role = "admin";
-  //     controller.showAdminReportForm(req, res);
-  //     expect(res.render).toHaveBeenCalledWith("admin/report-form", { title: "Form Laporan Admin", role: "admin" });
-  //   });
-  // });
+  describe("ReportController - showReportForm", () => {
+  let controller;
+  let req;
+  let res;
 
-  // // -------------------- CREATE --------------------
-  // describe("createReport & createReportAdmin", () => {
-  //   it("should create report successfully for user", async () => {
-  //     mockLaporan.create.mockResolvedValue({ id_laporan: 1 });
-  //     await controller.createReport(req, res);
+  beforeEach(() => {
+    controller = new ReportController({
+      Laporan: mockLaporan,
+      User: mockUser,
+      Claim: mockClaim,
+    });
 
-  //     expect(mockReportService.sendRealtimeNotification).toHaveBeenCalled();
-  //     expect(mockReportService.sendNewReportEmail).toHaveBeenCalled();
-  //     expect(res.redirect).toHaveBeenCalledWith("/mahasiswa/my-reports");
-  //   });
+    req = {
+      user: { role: "user" }, // mock user dengan role
+    };
 
-  //   it("should create report successfully for admin", async () => {
-  //     mockLaporan.create.mockResolvedValue({ id_laporan: 1 });
-  //     await controller.createReportAdmin(req, res);
-  //     expect(res.redirect).toHaveBeenCalledWith("/admin/my-reports");
-  //   });
-  // });
+    res = {
+      status: jest.fn().mockReturnThis(),
+      render: jest.fn(),
+    };
+  });
 
-  // // -------------------- GET --------------------
-  // describe("getUserReports & getAdminReports & getAllReportsUser/Admin & getDashboard", () => {
-  //   it("should render my-reports for user", async () => {
-  //     const fakeReports = [{ id_laporan: 1 }];
-  //     const fakeUser = { email: "test@example.com", nama: "Test" };
-  //     mockLaporan.findAll.mockResolvedValue(fakeReports);
-  //     mockUser.findOne.mockResolvedValue(fakeUser);
+  test("should render 'report-form' with correct title and role", async () => {
+    await controller.showReportForm(req, res);
 
-  //     await controller.getUserReports(req, res);
-  //     expect(res.render).toHaveBeenCalledWith("my-reports", { title: "Laporan Saya", reports: fakeReports, user: fakeUser });
-  //   });
+    expect(res.render).toHaveBeenCalledWith("report-form", {
+      title: "Form Laporan",
+      role: req.user.role,
+    });
+  });
 
-  //   it("should render admin reports", async () => {
-  //     const fakeReports = [{ id_laporan: 1 }];
-  //     const fakeUser = { email: "admin@test.com", nama: "Admin" };
-  //     req.user.email = "admin@test.com";
-  //     mockLaporan.findAll.mockResolvedValue(fakeReports);
-  //     mockUser.findOne.mockResolvedValue(fakeUser);
+  test("should render 'error' view with 500 status if an exception occurs", async () => {
+    // Simulasikan error dengan memaksa res.render throw
+    res.render.mockImplementationOnce(() => {
+      throw new Error("Render failed");
+    });
 
-  //     await controller.getAdminReports(req, res);
-  //     expect(res.render).toHaveBeenCalledWith("admin/my-reports", {
-  //       title: "Laporan Saya - Admin",
-  //       reports: fakeReports,
-  //       user: fakeUser,
-  //       success: undefined,
-  //     });
-  //   });
+    await controller.showReportForm(req, res);
 
-  //   it("should render all reports for user home", async () => {
-  //     const fakeReports = [{ id_laporan: 1 }];
-  //     const fakeUser = { email: "test@example.com" };
-  //     mockLaporan.findAll.mockResolvedValue(fakeReports);
-  //     mockUser.findOne.mockResolvedValue(fakeUser);
-
-  //     await controller.getAllReportsUser(req, res);
-  //     expect(res.render).toHaveBeenCalledWith("home", { reports: fakeReports, user: fakeUser });
-  //   });
-
-  //   it("should render all reports for admin", async () => {
-  //     const fakeReports = [{ id_laporan: 1 }];
-  //     mockLaporan.findAll.mockResolvedValue(fakeReports);
-  //     mockUser.findOne.mockResolvedValue({ email: "admin@test.com" });
-
-  //     await controller.getAllReportsAdmin(req, res);
-  //     expect(res.render).toHaveBeenCalledWith("admin/report", { reports: fakeReports, user: { email: "admin@test.com" } });
-  //   });
-
-  //   it("should render dashboard", async () => {
-  //     const allReports = [{ id_laporan: 1 }];
-  //     const pendingReports = [{ id_laporan: 2 }];
-  //     mockLaporan.findAll
-  //       .mockResolvedValueOnce(allReports)
-  //       .mockResolvedValueOnce(pendingReports);
-  //     mockUser.findOne.mockResolvedValue({ email: "admin@test.com" });
-
-  //     await controller.getDashboard(req, res);
-  //     expect(res.render).toHaveBeenCalledWith("admin/dashboard", { report: allReports, reports: pendingReports, user: { email: "admin@test.com" } });
-  //   });
-  // });
-
-  // // -------------------- UPDATE --------------------
-  // describe("updateReport & updateReportAdmin", () => {
-  //   it("should update report successfully", async () => {
-  //     const laporanInstance = { id_laporan: 1, email: "test@example.com", nama_barang: "Old Laptop", lokasi: "Old", deskripsi: "Old", save: jest.fn() };
-  //     mockLaporan.findOne.mockResolvedValue(laporanInstance);
-
-  //     await controller.updateReport(req, res);
-  //     expect(laporanInstance.nama_barang).toBe("Laptop");
-  //     expect(res.redirect).toHaveBeenCalledWith("/mahasiswa/my-reports");
-  //   });
-
-  //   it("should return 404 if report not found", async () => {
-  //     mockLaporan.findOne.mockResolvedValue(null);
-  //     await controller.updateReport(req, res);
-  //     expect(res.status).toHaveBeenCalledWith(404);
-  //   });
-  // });
-
-  // // -------------------- DELETE --------------------
-  // describe("deleteReport & deleteReportAdmin", () => {
-  //   it("should delete report successfully", async () => {
-  //     const laporanInstance = { foto_barang: "file.jpg", destroy: jest.fn() };
-  //     mockLaporan.findOne.mockResolvedValue(laporanInstance);
-
-  //     await controller.deleteReport(req, res);
-  //     expect(mockReportService.deleteOldFile).toHaveBeenCalledWith("file.jpg");
-  //     expect(res.json).toHaveBeenCalledWith({ success: true, message: "Laporan berhasil dihapus" });
-  //   });
-
-  //   it("should return error if report not found", async () => {
-  //     mockLaporan.findOne.mockResolvedValue(null);
-  //     await controller.deleteReport(req, res);
-  //     expect(res.json).toHaveBeenCalledWith({ success: false, message: "Laporan tidak ditemukan" });
-  //   });
-  // });
-
-  // // -------------------- CLAIM --------------------
-  // describe("claimReport", () => {
-  //   it("should claim report successfully", async () => {
-  //     const laporanInstance = { email: "other@test.com", status: "On Progress", save: jest.fn() };
-  //     mockLaporan.findByPk.mockResolvedValue(laporanInstance);
-  //     mockUser.findOne.mockResolvedValue({ nama: "Pelapor", email: "other@test.com" });
-
-  //     await controller.claimReport(req, res);
-  //     expect(laporanInstance.status).toBe("Claimed");
-  //     expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ success: true }));
-  //   });
-
-  //   it("should return 404 if laporan not found", async () => {
-  //     mockLaporan.findByPk.mockResolvedValue(null);
-  //     await controller.claimReport(req, res);
-  //     expect(res.status).toHaveBeenCalledWith(404);
-  //   });
-  // });
-
-  // // -------------------- ACCEPT CLAIM --------------------
-  // describe("acceptClaim & acceptClaimAdmin", () => {
-  //   it("should accept claim successfully", async () => {
-  //     const laporanInstance = { email: "test@example.com", save: jest.fn() };
-  //     mockLaporan.findByPk.mockResolvedValue(laporanInstance);
-  //     req.file = { filename: "bukti.jpg" };
-  //     req.body = { lokasi_penyerahan: "Kampus", tanggal_penyerahan: "2025-11-08", nama_pengklaim: "John", no_telepon_pengklaim: "081234" };
-
-  //     await controller.acceptClaim(req, res);
-  //     expect(laporanInstance.status).toBe("Done");
-  //     expect(res.redirect).toHaveBeenCalledWith("/mahasiswa/history");
-  //   });
-  // });
-
-  // // -------------------- REJECT CLAIM --------------------
-  // describe("rejectClaim", () => {
-  //   it("should reject claim successfully", async () => {
-  //     const claimRecord = { status: "Waiting for approval", save: jest.fn(), alasan: null };
-  //     const laporanInstance = { status: "On progress", save: jest.fn() };
-  //     mockClaim.findOne.mockResolvedValue(claimRecord);
-  //     mockLaporan.findByPk.mockResolvedValue(laporanInstance);
-  //     req.body.alasan = "Salah klaim";
-
-  //     await controller.rejectClaim(req, res);
-  //     expect(claimRecord.status).toBe("Rejected");
-  //     expect(laporanInstance.status).toBe("On progress");
-  //     expect(res.json).toHaveBeenCalledWith({ success: true, message: "Claim berhasil ditolak" });
-  //   });
-  // });
-
-  // // -------------------- REAPPLY --------------------
-  // describe("reapplyReport & reapplyReportAdmin", () => {
-  //   it("should reapply report successfully for user", async () => {
-  //     const laporanInstance = { status: "Rejected", save: jest.fn() };
-  //     mockLaporan.findByPk.mockResolvedValue(laporanInstance);
-
-  //     await controller.reapplyReport(req, res);
-  //     expect(laporanInstance.status).toBe("Waiting for upload verification");
-  //     expect(res.redirect).toHaveBeenCalledWith("/mahasiswa/my-reports");
-  //   });
-
-  //   it("should reapply report successfully for admin", async () => {
-  //     const laporanInstance = { status: "Rejected", save: jest.fn() };
-  //     mockLaporan.findByPk.mockResolvedValue(laporanInstance);
-
-  //     await controller.reapplyReportAdmin(req, res);
-  //     expect(laporanInstance.status).toBe("Waiting for upload verification");
-  //     expect(res.redirect).toHaveBeenCalledWith("/admin/my-reports");
-  //   });
-  // });
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.render).toHaveBeenCalledWith("error", {
+      message: "Terjadi kesalahan saat memuat halaman form laporan",
+    });
+  });
 });
+
+describe("ReportController - showAdminReportForm", () => {
+  let controller;
+  let req;
+  let res;
+
+  beforeEach(() => {
+    controller = new ReportController({
+      Laporan: mockLaporan,
+      User: mockUser,
+      Claim: mockClaim,
+    });
+
+    req = {
+      user: { role: "admin" }, // mock user dengan role admin
+    };
+
+    res = {
+      status: jest.fn().mockReturnThis(),
+      render: jest.fn(),
+    };
+  });
+
+  test("should render 'admin/report-form' with correct title and role", async () => {
+    await controller.showAdminReportForm(req, res);
+
+    expect(res.render).toHaveBeenCalledWith("admin/report-form", {
+      title: "Form Laporan Admin",
+      role: req.user.role,
+    });
+  });
+
+  test("should render 'error' view with 500 status if an exception occurs", async () => {
+    // Simulasikan error dengan memaksa res.render throw
+    res.render.mockImplementationOnce(() => {
+      throw new Error("Render failed");
+    });
+
+    await controller.showAdminReportForm(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.render).toHaveBeenCalledWith("error", {
+      message: "Terjadi kesalahan saat memuat halaman form laporan",
+    });
+  });
+});
+
+
+describe("ReportController - getAdminReports", () => {
+  let controller;
+  let req;
+  let res;
+
+  beforeEach(() => {
+    controller = new ReportController({
+      Laporan: mockLaporan,
+      User: mockUser,
+      Claim: mockClaim,
+    });
+
+    req = {
+      user: { email: "admin@example.com", role: "admin" },
+      query: {},
+    };
+
+    res = {
+      status: jest.fn().mockReturnThis(),
+      render: jest.fn(),
+    };
+
+    jest.clearAllMocks();
+  });
+
+  test("should render 'admin/my-reports' with reports and user", async () => {
+    // Mock public method getReportsWithIncludes
+    controller.getReportsWithIncludes = jest.fn().mockResolvedValue([
+      { id_laporan: 1, nama_barang: "Laptop" },
+    ]);
+
+    mockUser.findOne.mockResolvedValue({ email: "admin@example.com", role: "admin" });
+
+    await controller.getAdminReports(req, res);
+
+    expect(controller.getReportsWithIncludes).toHaveBeenCalledWith({ email: "admin@example.com" });
+    expect(mockUser.findOne).toHaveBeenCalledWith({ where: { email: "admin@example.com" } });
+    expect(res.render).toHaveBeenCalledWith("admin/my-reports", {
+      title: "Laporan Saya - Admin",
+      reports: [{ id_laporan: 1, nama_barang: "Laptop" }],
+      user: { email: "admin@example.com", role: "admin" },
+      success: undefined,
+    });
+  });
+
+  test("should render with success query parameter", async () => {
+    req.query.success = "true";
+    controller.getReportsWithIncludes = jest.fn().mockResolvedValue([]);
+    mockUser.findOne.mockResolvedValue({ email: "admin@example.com" });
+
+    await controller.getAdminReports(req, res);
+
+    expect(res.render).toHaveBeenCalledWith("admin/my-reports", expect.objectContaining({
+      success: "true",
+    }));
+  });
+
+  test("should render error page if user not found", async () => {
+    controller.getReportsWithIncludes = jest.fn().mockResolvedValue([]);
+    mockUser.findOne.mockResolvedValue(null); // user tidak ditemukan
+
+    await controller.getAdminReports(req, res);
+
+    expect(res.render).toHaveBeenCalledWith("admin/my-reports", expect.objectContaining({
+      user: null,
+    }));
+  });
+
+  test("should render error page if getReportsWithIncludes throws", async () => {
+    const error = new Error("DB error");
+    controller.getReportsWithIncludes = jest.fn().mockRejectedValue(error);
+
+    await controller.getAdminReports(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.render).toHaveBeenCalledWith("error", {
+      message: "Terjadi kesalahan saat memuat data laporan",
+    });
+  });
+
+  test("should render error page if User.findOne throws", async () => {
+    controller.getReportsWithIncludes = jest.fn().mockResolvedValue([]);
+    mockUser.findOne.mockRejectedValue(new Error("DB error"));
+
+    await controller.getAdminReports(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.render).toHaveBeenCalledWith("error", {
+      message: "Terjadi kesalahan saat memuat data laporan",
+    });
+  });
+});
+
+describe("ReportController - createReport", () => {
+  let controller;
+  let req;
+  let res;
+
+  beforeEach(() => {
+    controller = new ReportController({
+      Laporan: mockLaporan,
+      User: mockUser,
+      Claim: mockClaim,
+    });
+
+    // inject mock reportService
+    controller.reportService = mockReportService;
+
+    req = {
+      body: {
+        jenis_laporan: "Hilang",
+        nama_barang: "Laptop",
+        lokasi_kejadian: "Kampus",
+        tanggal_kejadian: "2025-11-08",
+        deskripsi: "Dicuri",
+      },
+      user: { email: "test@example.com", role: "user" },
+      file: { filename: "foto.jpg" },
+    };
+
+    res = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+      redirect: jest.fn(),
+    };
+
+    jest.clearAllMocks();
+  });
+
+  test("should create report and redirect to '/mahasiswa/my-reports' for normal user", async () => {
+    mockLaporan.create.mockResolvedValue({ id_laporan: 1, ...req.body });
+
+    await controller.createReport(req, res);
+
+    expect(mockLaporan.create).toHaveBeenCalledWith(expect.objectContaining({
+      email: "test@example.com",
+      jenis_laporan: "Hilang",
+      nama_barang: "Laptop",
+      lokasi: "Kampus",
+      deskripsi: "Dicuri",
+      foto_barang: "foto.jpg",
+      status: "Waiting for upload verification",
+      tanggal_kejadian: expect.any(Date),
+      tanggal_laporan: expect.any(Date),
+    }));
+
+    expect(mockReportService.sendRealtimeNotification).toHaveBeenCalledWith(req, expect.any(Object));
+    expect(mockReportService.sendNewReportEmail).toHaveBeenCalledWith(expect.objectContaining({
+      email: "test@example.com",
+    }));
+    expect(res.redirect).toHaveBeenCalledWith("/mahasiswa/my-reports");
+  });
+
+  test("should create report and redirect to '/admin/my-reports' for admin", async () => {
+    req.user.role = "admin";
+    // langsung panggil private method via bind atau call
+    const privateProcess = controller["#processCreateReport"].bind(controller);
+    mockLaporan.create.mockResolvedValue({ id_laporan: 1, ...req.body });
+
+    await privateProcess(req, res, true); // isAdmin = true
+
+    expect(mockLaporan.create).toHaveBeenCalledWith(expect.objectContaining({
+      status: "On Progress",
+    }));
+    expect(res.redirect).toHaveBeenCalledWith("/admin/my-reports");
+  });
+
+  test("should return 400 if required fields are missing", async () => {
+    req.body.nama_barang = "";
+    await controller.createReport(req, res);
+
+    expect(mockReportService.cleanupUploadedFile).toHaveBeenCalledWith(req);
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.json).toHaveBeenCalledWith({
+      success: false,
+      message: "Semua field wajib diisi",
+    });
+  });
+
+  test("should return 500 if Laporan.create throws", async () => {
+    mockLaporan.create.mockRejectedValue(new Error("DB error"));
+
+    await controller.createReport(req, res);
+
+    expect(mockReportService.cleanupUploadedFile).toHaveBeenCalledWith(req);
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.json).toHaveBeenCalledWith({
+      success: false,
+      message: "Terjadi kesalahan saat menyimpan laporan",
+    });
+  });
+});
+
+
+
+
+
+
+  describe("ReportController - getAllReportsUser", () => {
+  test("should render 'home' with reports and user", async () => {
+    controller.getReportsWithIncludes = jest.fn().mockResolvedValue([{ id_laporan: 1 }]);
+    mockUser.findOne.mockResolvedValue({ email: "test@example.com", role: "user" });
+
+    await controller.getAllReportsUser(req, res);
+
+    expect(controller.getReportsWithIncludes).toHaveBeenCalledWith({ status: "On Progress" });
+    expect(mockUser.findOne).toHaveBeenCalledWith({ where: { email: "test@example.com" } });
+    expect(res.render).toHaveBeenCalledWith("home", expect.objectContaining({
+      reports: [{ id_laporan: 1 }],
+      user: { email: "test@example.com", role: "user" },
+    }));
+  });
+
+  test("should render 'home' with reports and null user if req.user undefined", async () => {
+    req.user = null;
+    controller.getReportsWithIncludes = jest.fn().mockResolvedValue([{ id_laporan: 2 }]);
+
+    await controller.getAllReportsUser(req, res);
+
+    expect(controller.getReportsWithIncludes).toHaveBeenCalledWith({ status: "On Progress" });
+    expect(res.render).toHaveBeenCalledWith("home", expect.objectContaining({
+      reports: [{ id_laporan: 2 }],
+      user: null,
+    }));
+  });
+
+  test("should render 'home' with empty reports array if no reports found", async () => {
+    controller.getReportsWithIncludes = jest.fn().mockResolvedValue([]);
+    mockUser.findOne.mockResolvedValue({ email: "test@example.com", role: "user" });
+
+    await controller.getAllReportsUser(req, res);
+
+    expect(res.render).toHaveBeenCalledWith("home", expect.objectContaining({
+      reports: [],
+      user: { email: "test@example.com", role: "user" },
+    }));
+  });
+
+  test("should send 500 if getReportsWithIncludes throws", async () => {
+    controller.getReportsWithIncludes = jest.fn().mockRejectedValue(new Error("DB error"));
+
+    await controller.getAllReportsUser(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.send).toHaveBeenCalledWith("Terjadi kesalahan pada server");
+  });
+
+  test("should send 500 if User.findOne throws", async () => {
+    controller.getReportsWithIncludes = jest.fn().mockResolvedValue([{ id_laporan: 3 }]);
+    mockUser.findOne.mockRejectedValue(new Error("DB error"));
+
+    await controller.getAllReportsUser(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.send).toHaveBeenCalledWith("Terjadi kesalahan pada server");
+  });
+
+
+
+
+
+
+});
+
+describe("ReportController - getAllReportsAdmin", () => {
+   let controller;
+  let req;
+  let res;
+
+  beforeEach(() => {
+    controller = new ReportController({
+      Laporan: mockLaporan,
+      User: mockUser,
+      Claim: mockClaim,
+    });
+
+    req = {
+      user: { email: "admin@example.com", role: "admin" },
+    };
+
+    res = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+      redirect: jest.fn(),
+      render: jest.fn(),
+      send: jest.fn(), // penting untuk testing error handling
+    };
+
+    jest.clearAllMocks();
+  });
+
+  test("should render 'admin/report' with reports and user", async () => {
+    controller.getReportsWithIncludes = jest.fn().mockResolvedValue([{ id_laporan: 1, nama_barang: "Laptop" }]);
+    mockUser.findOne.mockResolvedValue({ email: "admin@example.com", role: "admin" });
+
+    await controller.getAllReportsAdmin(req, res);
+
+    expect(controller.getReportsWithIncludes).toHaveBeenCalledWith({ status: "On Progress" });
+    expect(mockUser.findOne).toHaveBeenCalledWith({ where: { email: "admin@example.com" } });
+    expect(res.render).toHaveBeenCalledWith("admin/report", {
+      reports: [{ id_laporan: 1, nama_barang: "Laptop" }],
+      user: { email: "admin@example.com", role: "admin" },
+    });
+  });
+
+  test("should render 'admin/report' with empty reports array if no reports found", async () => {
+    controller.getReportsWithIncludes = jest.fn().mockResolvedValue([]);
+    mockUser.findOne.mockResolvedValue({ email: "admin@example.com", role: "admin" });
+
+    await controller.getAllReportsAdmin(req, res);
+
+    expect(res.render).toHaveBeenCalledWith("admin/report", {
+      reports: [],
+      user: { email: "admin@example.com", role: "admin" },
+    });
+  });
+
+  test("should render 'admin/report' with null user if User.findOne returns null", async () => {
+    controller.getReportsWithIncludes = jest.fn().mockResolvedValue([{ id_laporan: 2 }]);
+    mockUser.findOne.mockResolvedValue(null);
+
+    await controller.getAllReportsAdmin(req, res);
+
+    expect(res.render).toHaveBeenCalledWith("admin/report", {
+      reports: [{ id_laporan: 2 }],
+      user: null,
+    });
+  });
+
+  test("should send 500 if getReportsWithIncludes throws", async () => {
+    controller.getReportsWithIncludes = jest.fn().mockRejectedValue(new Error("DB error"));
+
+    await controller.getAllReportsAdmin(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.send).toHaveBeenCalledWith("Terjadi kesalahan pada server");
+  });
+
+  test("should send 500 if User.findOne throws", async () => {
+    controller.getReportsWithIncludes = jest.fn().mockResolvedValue([{ id_laporan: 3 }]);
+    mockUser.findOne.mockRejectedValue(new Error("DB error"));
+
+    await controller.getAllReportsAdmin(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.send).toHaveBeenCalledWith("Terjadi kesalahan pada server");
+  });
+});
+
+describe("ReportController - getDashboard", () => {
+  let controller;
+  let req;
+  let res;
+
+  beforeEach(() => {
+    controller = new ReportController({
+      Laporan: mockLaporan,
+      User: mockUser,
+      Claim: mockClaim,
+    });
+
+    req = {
+      user: { email: "admin@example.com", role: "admin" },
+    };
+
+    res = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+      redirect: jest.fn(),
+      render: jest.fn(),
+      send: jest.fn(), // penting untuk testing error handling
+    };
+
+    jest.clearAllMocks();
+  });
+
+  test("should render 'admin/dashboard' with all reports, pending reports, and user", async () => {
+    mockLaporan.findAll
+      .mockResolvedValueOnce([{ id_laporan: 1, nama_barang: "Laptop" }]) // allReports
+      .mockResolvedValueOnce([{ id_laporan: 2, nama_barang: "HP" }]); // pendingReports
+    mockUser.findOne.mockResolvedValue({ email: "admin@example.com", role: "admin" });
+
+    await controller.getDashboard(req, res);
+
+    expect(mockLaporan.findAll).toHaveBeenCalledTimes(2);
+    expect(mockLaporan.findAll).toHaveBeenNthCalledWith(2, {
+      where: { status: "Waiting for upload verification" },
+      include: [{ model: mockUser }],
+      order: [["createdAt", "DESC"]],
+    });
+    expect(mockUser.findOne).toHaveBeenCalledWith({ where: { email: "admin@example.com" } });
+    expect(res.render).toHaveBeenCalledWith("admin/dashboard", {
+      report: [{ id_laporan: 1, nama_barang: "Laptop" }],
+      reports: [{ id_laporan: 2, nama_barang: "HP" }],
+      user: { email: "admin@example.com", role: "admin" },
+    });
+  });
+
+  test("should render with empty arrays if no reports found", async () => {
+    mockLaporan.findAll
+      .mockResolvedValueOnce([]) // allReports
+      .mockResolvedValueOnce([]); // pendingReports
+    mockUser.findOne.mockResolvedValue({ email: "admin@example.com", role: "admin" });
+
+    await controller.getDashboard(req, res);
+
+    expect(res.render).toHaveBeenCalledWith("admin/dashboard", {
+      report: [],
+      reports: [],
+      user: { email: "admin@example.com", role: "admin" },
+    });
+  });
+
+  test("should render with null user if User.findOne returns null", async () => {
+    mockLaporan.findAll
+      .mockResolvedValueOnce([{ id_laporan: 1 }])
+      .mockResolvedValueOnce([{ id_laporan: 2 }]);
+    mockUser.findOne.mockResolvedValue(null);
+
+    await controller.getDashboard(req, res);
+
+    expect(res.render).toHaveBeenCalledWith("admin/dashboard", {
+      report: [{ id_laporan: 1 }],
+      reports: [{ id_laporan: 2 }],
+      user: null,
+    });
+  });
+
+  test("should send 500 if Laporan.findAll for allReports throws", async () => {
+    mockLaporan.findAll.mockRejectedValueOnce(new Error("DB error"));
+
+    await controller.getDashboard(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.send).toHaveBeenCalledWith("Terjadi kesalahan pada server");
+  });
+
+  test("should send 500 if Laporan.findAll for pendingReports throws", async () => {
+    mockLaporan.findAll
+      .mockResolvedValueOnce([{ id_laporan: 1 }])
+      .mockRejectedValueOnce(new Error("DB error"));
+
+    await controller.getDashboard(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.send).toHaveBeenCalledWith("Terjadi kesalahan pada server");
+  });
+
+  test("should send 500 if User.findOne throws", async () => {
+    mockLaporan.findAll
+      .mockResolvedValueOnce([{ id_laporan: 1 }])
+      .mockResolvedValueOnce([{ id_laporan: 2 }]);
+    mockUser.findOne.mockRejectedValue(new Error("DB error"));
+
+    await controller.getDashboard(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.send).toHaveBeenCalledWith("Terjadi kesalahan pada server");
+  });
+});
+
+
+
+
+
+
+
+});
+
+
