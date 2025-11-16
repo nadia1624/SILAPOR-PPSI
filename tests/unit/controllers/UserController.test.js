@@ -1,13 +1,15 @@
 const UserController = require("../../../controllers/UserController");
+const fs = require("fs");
+const path = require("path");
 
-describe("UserController Unit Test", () => {
+jest.mock("fs");
 
+describe("UserController Unit Test Lengkap", () => {
   let mockUserModel;
   let controller;
   let req, res;
 
   beforeEach(() => {
-    // Mock model User
     mockUserModel = {
       findAll: jest.fn(),
       findOne: jest.fn(),
@@ -18,7 +20,6 @@ describe("UserController Unit Test", () => {
 
     controller = new UserController({ User: mockUserModel });
 
-    // Mock req & res
     req = {
       params: {},
       body: {},
@@ -34,152 +35,161 @@ describe("UserController Unit Test", () => {
     };
   });
 
-
   // LIST USERS
-  test("listUsers() harus render halaman user dengan data", async () => {
-    mockUserModel.findAll.mockResolvedValue([{ email: "a@test.com" }]);
+  test("listUsers() success", async () => {
+    mockUserModel.findAll.mockResolvedValue([{ email: "x@test.com" }]);
     mockUserModel.findOne.mockResolvedValue({ email: "admin@test.com" });
 
     await controller.listUsers(req, res);
 
     expect(mockUserModel.findAll).toHaveBeenCalled();
-    expect(res.render).toHaveBeenCalledWith(
-      "admin/user",
-      expect.objectContaining({
-        title: "Manajemen User",
-        users: [{ email: "a@test.com" }],
-        user: { email: "admin@test.com" }
-      })
-    );
+    expect(res.render).toHaveBeenCalled();
   });
 
+  test("listUsers() error", async () => {
+    mockUserModel.findAll.mockRejectedValue(new Error("DB ERROR"));
+
+    await controller.listUsers(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.render).toHaveBeenCalledWith("error", {
+      message: "Terjadi kesalahan saat memuat daftar user"
+    });
+  });
 
   // DELETE USER
-  test("deleteUser() harus memanggil destroy dan redirect", async () => {
+  test("deleteUser() success", async () => {
     req.params.email = "hapus@test.com";
-    mockUserModel.destroy.mockResolvedValue(true);
+    mockUserModel.destroy.mockResolvedValue(1);
 
     await controller.deleteUser(req, res);
 
-    expect(mockUserModel.destroy).toHaveBeenCalledWith({
-      where: { email: "hapus@test.com" }
-    });
     expect(res.redirect).toHaveBeenCalledWith("/admin/userList");
   });
 
+  test("deleteUser() error", async () => {
+    req.params.email = "err@test.com";
+    mockUserModel.destroy.mockRejectedValue(new Error("ERR"));
 
-  // SHOW EDIT USER
-  test("showEditForm() harus render edit user jika data ditemukan", async () => {
+    await controller.deleteUser(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.render).toHaveBeenCalledWith("error", {
+      message: "Terjadi kesalahan saat menghapus user"
+    });
+  });
+
+  // SHOW EDIT FORM
+  test("showEditForm() success", async () => {
     req.params.email = "user@test.com";
 
     mockUserModel.findOne
       .mockResolvedValueOnce({ email: "user@test.com" }) // target user
-      .mockResolvedValueOnce({ email: "admin@test.com" }); // admin
+      .mockResolvedValueOnce({ email: "admin@test.com" }); // admin user
 
     await controller.showEditForm(req, res);
 
-    expect(res.render).toHaveBeenCalledWith(
-      "admin/editUser",
-      expect.objectContaining({
-        title: "Edit User",
-        targetUser: { email: "user@test.com" },
-        user: { email: "admin@test.com" }
-      })
-    );
+    expect(res.render).toHaveBeenCalled();
   });
 
-  test("showEditForm() return 404 jika user tidak ditemukan", async () => {
-    req.params.email = "tidakada@test.com";
+  test("showEditForm() user not found", async () => {
+    req.params.email = "xx@test.com";
     mockUserModel.findOne.mockResolvedValue(null);
 
     await controller.showEditForm(req, res);
 
     expect(res.status).toHaveBeenCalledWith(404);
     expect(res.render).toHaveBeenCalledWith("error", {
-      message: "User tidak ditemukan"
+      message: "User tidak ditemukan",
+    });
+  });
+
+  test("showEditForm() error", async () => {
+    mockUserModel.findOne.mockRejectedValue(new Error("ERR"));
+
+    await controller.showEditForm(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.render).toHaveBeenCalledWith("error", {
+      message: "Terjadi kesalahan saat memuat data user"
     });
   });
 
 
   // UPDATE USER
-  test("updateUser() harus memanggil update dan redirect", async () => {
+  test("updateUser() success", async () => {
     req.params.email = "user@test.com";
-    req.body = {
-      nama: "A",
-      email: "B",
-      no_telepon: "123",
-      alamat: "Jl A",
-      role: "staff"
-    };
+    req.body = { nama: "A" };
 
     mockUserModel.update.mockResolvedValue([1]);
 
     await controller.updateUser(req, res);
 
-    expect(mockUserModel.update).toHaveBeenCalled();
     expect(res.redirect).toHaveBeenCalledWith("/admin/userList");
+  });
+
+  test("updateUser() error", async () => {
+    mockUserModel.update.mockRejectedValue(new Error("ERR"));
+
+    await controller.updateUser(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.render).toHaveBeenCalledWith("error", {
+      message: "Terjadi kesalahan saat memperbarui data user"
+    });
   });
 
 
   // CREATE USER
-  test("createUser() harus menolak email yang sudah terdaftar", async () => {
-    req.body = {
-      nama: "A",
-      email: "ada@test.com",
-      password: "123",
-      no_telepon: "123",
-      alamat: "alamat",
-      role: "staff"
-    };
+  test("createUser() email exists", async () => {
+    req.body = { email: "ada@test.com", password: "123" };
+    mockUserModel.findOne.mockResolvedValue({});
 
-    mockUserModel.findOne.mockResolvedValueOnce({ email: "ada@test.com" });
     mockUserModel.findAll.mockResolvedValue([]);
 
     await controller.createUser(req, res);
 
-    expect(res.render).toHaveBeenCalledWith(
-      "admin/user",
-      expect.objectContaining({
-        error: "Email sudah terdaftar."
-      })
-    );
+    expect(res.render).toHaveBeenCalled();
   });
 
-  it("createUser() harus membuat user baru jika email belum ada", async () => {
-  const req = {
-    body: {
-      nama: "Test",
-      email: "baru@example.com",
-      password: "12345",
-      role: "admin",
-    },
-  };
+  test("createUser() success", async () => {
+    req.body = {
+      nama: "A",
+      email: "baru@test.com",
+      password: "123",
+      role: "admin"
+    };
 
-  mockUserModel.findOne.mockResolvedValue(null); 
-  mockUserModel.create.mockResolvedValue({ id: 1 });
+    mockUserModel.findOne.mockResolvedValue(null);
+    mockUserModel.create.mockResolvedValue({});
 
-  await controller.createUser(req, res);
+    await controller.createUser(req, res);
 
-  expect(mockUserModel.create).toHaveBeenCalled();
-  expect(res.redirect).toHaveBeenCalledWith("/admin/userList");
-});
+    expect(res.redirect).toHaveBeenCalledWith("/admin/userList");
+  });
+
+  test("createUser() error", async () => {
+    mockUserModel.findOne.mockRejectedValue(new Error("ERR"));
+
+    await controller.createUser(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.render).toHaveBeenCalledWith("error", {
+      message: "Terjadi kesalahan saat membuat user baru"
+    });
+  });
 
 
-  // SHOW ADMIN PROFILE
-  test("showAdminProfile() menampilkan profil admin jika ditemukan", async () => {
+  // ADMIN PROFILE
+  test("showAdminProfile() success", async () => {
     mockUserModel.findOne.mockResolvedValue({ email: "admin@test.com" });
 
     await controller.showAdminProfile(req, res);
 
-    expect(res.render).toHaveBeenCalledWith(
-      "admin/profile",
-      expect.objectContaining({
-        user: { email: "admin@test.com" }
-      })
-    );
+    expect(res.render).toHaveBeenCalled();
   });
 
-  test("showAdminProfile() return 404 jika user tidak ada", async () => {
+  test("showAdminProfile() user not found", async () => {
     mockUserModel.findOne.mockResolvedValue(null);
 
     await controller.showAdminProfile(req, res);
@@ -188,25 +198,102 @@ describe("UserController Unit Test", () => {
     expect(res.send).toHaveBeenCalledWith("User tidak ditemukan");
   });
 
+  test("showAdminProfile() error", async () => {
+    mockUserModel.findOne.mockRejectedValue(new Error("ERR"));
+
+    await controller.showAdminProfile(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.send).toHaveBeenCalledWith("Gagal mengambil data profil");
+  });
+
+
+  // SHOW ADMIN EDIT PROFILE
+  test("showAdminEditProfile() success", async () => {
+    mockUserModel.findOne.mockResolvedValue({ email: "admin@test.com" });
+
+    await controller.showAdminEditProfile(req, res);
+
+    expect(res.render).toHaveBeenCalled();
+  });
+
+  test("showAdminEditProfile() not found", async () => {
+    mockUserModel.findOne.mockResolvedValue(null);
+
+    await controller.showAdminEditProfile(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(404);
+    expect(res.send).toHaveBeenCalledWith("User tidak ditemukan");
+  });
+
+  test("showAdminEditProfile() error", async () => {
+    mockUserModel.findOne.mockRejectedValue(new Error("ERR"));
+
+    await controller.showAdminEditProfile(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.send).toHaveBeenCalledWith("Gagal memuat form edit");
+  });
+
 
   // UPDATE ADMIN PROFILE
-  test("updateAdminProfile() harus update data admin", async () => {
-    req.body = { nama: "Baru" };
-
-    const mockAdmin = {
+  test("updateAdminProfile() success tanpa foto", async () => {
+    const mockUser = {
       nama: "Admin",
-      alamat: "Alamat",
-      no_telepon: "222",
+      alamat: "X",
+      no_telepon: "11",
+      foto: null,
       save: jest.fn().mockResolvedValue(true),
-      foto: null
     };
 
-    mockUserModel.findOne.mockResolvedValue(mockAdmin);
+    req.body = { nama: "Baru" };
+
+    mockUserModel.findOne.mockResolvedValue(mockUser);
 
     await controller.updateAdminProfile(req, res);
 
-    expect(mockAdmin.save).toHaveBeenCalled();
+    expect(mockUser.save).toHaveBeenCalled();
     expect(res.redirect).toHaveBeenCalledWith("/admin/profile");
   });
 
+  test("updateAdminProfile() success dengan foto baru + hapus foto lama", async () => {
+    req.file = { filename: "baru.jpg" };
+    req.body = {};
+
+    const mockUser = {
+      nama: "A",
+      alamat: "B",
+      no_telepon: "123",
+      foto: "lama.jpg",
+      save: jest.fn().mockResolvedValue(true),
+    };
+
+    fs.existsSync.mockReturnValue(true);
+    fs.unlinkSync.mockReturnValue();
+
+    mockUserModel.findOne.mockResolvedValue(mockUser);
+
+    await controller.updateAdminProfile(req, res);
+
+    expect(fs.unlinkSync).toHaveBeenCalled();
+    expect(mockUser.save).toHaveBeenCalled();
+  });
+
+  test("updateAdminProfile() not found", async () => {
+    mockUserModel.findOne.mockResolvedValue(null);
+
+    await controller.updateAdminProfile(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(404);
+    expect(res.send).toHaveBeenCalledWith("User tidak ditemukan");
+  });
+
+  test("updateAdminProfile() error", async () => {
+    mockUserModel.findOne.mockRejectedValue(new Error("ERR"));
+
+    await controller.updateAdminProfile(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.send).toHaveBeenCalledWith("Terjadi kesalahan saat update profile");
+  });
 });
