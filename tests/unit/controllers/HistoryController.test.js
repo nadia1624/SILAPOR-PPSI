@@ -1,4 +1,3 @@
-// tests/unit/controllers/HistoryController.test.js
 const HistoryController = require("../../../controllers/HistoryController");
 const DocumentService = require("../../../services/DocumentService");
 const { Op } = require("sequelize");
@@ -36,9 +35,6 @@ describe("HistoryController — Standard Unit Test", () => {
         };
     });
 
-    // ======================================================
-    // A. getDoneReports
-    // ======================================================
     describe("getDoneReports()", () => {
         test("should return 404 if user not found", async () => {
             mockModels.User.findOne.mockResolvedValue(null);
@@ -120,9 +116,6 @@ describe("HistoryController — Standard Unit Test", () => {
         });
     });
 
-    // ======================================================
-    // B. getDoneReportsAdmin
-    // ======================================================
     describe("getDoneReportsAdmin()", () => {
         test("should render reports from private method", async () => {
             const spyPriv = jest
@@ -146,9 +139,6 @@ describe("HistoryController — Standard Unit Test", () => {
         });
     });
 
-    // ======================================================
-    // C. getReportHistoryById (User)
-    // ======================================================
     describe("getReportHistoryById()", () => {
         test("should return 404 when report not found", async () => {
             mockModels.Laporan.findOne.mockResolvedValue(null);
@@ -183,9 +173,6 @@ describe("HistoryController — Standard Unit Test", () => {
         });
     });
 
-    // ======================================================
-    // D. getReportHistoryByIdAdmin
-    // ======================================================
     describe("getReportHistoryByIdAdmin()", () => {
         test("should return 404 if no report", async () => {
             mockModels.Laporan.findOne.mockResolvedValue(null);
@@ -214,9 +201,6 @@ describe("HistoryController — Standard Unit Test", () => {
         });
     });
 
-    // ======================================================
-    // E. downloadReportPdf (User)
-    // ======================================================
     describe("downloadReportPdf()", () => {
         test("should return 404 if report not found", async () => {
             mockModels.Laporan.findOne.mockResolvedValue(null);
@@ -258,9 +242,6 @@ describe("HistoryController — Standard Unit Test", () => {
         });
     });
 
-    // ======================================================
-    // F. downloadReportPdfAdmin
-    // ======================================================
     describe("downloadReportPdfAdmin()", () => {
         test("should return 404 when not found", async () => {
             mockModels.Laporan.findOne.mockResolvedValue(null);
