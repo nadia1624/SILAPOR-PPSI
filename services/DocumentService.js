@@ -20,17 +20,11 @@ class DocumentService {
             jenis_laporan: laporan.jenis_laporan || "-",
             nama_barang: laporan.nama_barang || "-",
             status: laporan.status || "-",
-            tanggal_kejadian: laporan.tanggal_kejadian
-                ? new Date(laporan.tanggal_kejadian).toLocaleDateString("id-ID")
-                : "-",
+            tanggal_kejadian: this.#formatDate(laporan.tanggal_kejadian),
             lokasi: laporan.lokasi || "-",
-            tanggal_laporan: laporan.tanggal_laporan
-                ? new Date(laporan.tanggal_laporan).toLocaleDateString("id-ID")
-                : "-",
+            tanggal_laporan: this.#formatDate(laporan.tanggal_laporan),
             deskripsi: laporan.deskripsi || "-",
-            tanggal_penyerahan: laporan.tanggal_penyerahan
-                ? new Date(laporan.tanggal_penyerahan).toLocaleDateString("id-ID")
-                : "-",
+            tanggal_penyerahan: this.#formatDate(laporan.tanggal_penyerahan),
             lokasi_penyerahan: laporan.lokasi_penyerahan || "-",
             pengklaim: laporan.pengklaim || "-",
             no_hp_pengklaim: laporan.no_hp_pengklaim || "-",
@@ -43,6 +37,12 @@ class DocumentService {
                 ? path.join(process.cwd(), "uploads", laporan.foto_bukti)
                 : null,
         };
+    }
+
+    // Metode helper untuk format tanggal
+    #formatDate(date) {
+        if (!date) return "-";
+        return new Date(date).toLocaleDateString("id-ID");
     }
 
     // Metode untuk menginisialisasi Docxtemplater
