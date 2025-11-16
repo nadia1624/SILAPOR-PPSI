@@ -8,9 +8,8 @@ class HistoryController {
     constructor(models) {
         this.Laporan = models.Laporan;
         this.User = models.User;
-        this.documentService = new DocumentService(); // Inisialisasi Service
+        this.documentService = new DocumentService(); 
 
-        // Binding semua method
         this.getDoneReports = this.getDoneReports.bind(this);
         this.getDoneReportsAdmin = this.getDoneReportsAdmin.bind(this);
         this.getReportHistoryById = this.getReportHistoryById.bind(this);
@@ -19,7 +18,6 @@ class HistoryController {
         this.downloadReportPdfAdmin = this.downloadReportPdfAdmin.bind(this);
     }
 
-    // --- METODE UTILITY (Helper) ---
 
     async #getFilteredReports(query) {
         const { filterJenis, searchNama } = query;
@@ -37,7 +35,7 @@ class HistoryController {
 
     async #getReportById(id, email = null) {
         const whereClause = { id_laporan: id, status: "Done" };
-        if (email) whereClause.email = email; // Tambahkan filter email untuk user biasa
+        if (email) whereClause.email = email;
 
         const report = await this.Laporan.findOne({
             where: whereClause,
@@ -50,8 +48,6 @@ class HistoryController {
         });
         return report;
     }
-
-    // --- CONTROLLER METHODS (Public) ---
 
     async getDoneReports(req, res) {
     try {
@@ -89,7 +85,6 @@ class HistoryController {
             const reports = await this.#getFilteredReports(req.query);
             const user = await this.User.findOne({ where: { email: req.user.email } });
 
-            // Perbedaan hanya di view yang di-render
             res.render("admin/history", { 
                 reports, 
                 user,
@@ -109,7 +104,7 @@ class HistoryController {
 
             if (!report) return res.status(404).json({ success: false, message: "Riwayat laporan tidak ditemukan" });
 
-            res.render("user/historyDetail", { // Asumsi Anda punya view detail terpisah
+            res.render("user/historyDetail", { 
                 title: "Riwayat Laporan Detail",
                 user,
                 report,
@@ -122,13 +117,12 @@ class HistoryController {
 
     async getReportHistoryByIdAdmin(req, res) {
         try {
-            // Admin tidak perlu filter email
             const report = await this.#getReportById(req.params.id); 
             const user = await this.User.findOne({ where: { email: req.user.email } });
 
             if (!report) return res.status(404).json({ success: false, message: "Riwayat laporan tidak ditemukan" });
 
-            res.render("admin/historyDetail", { // Asumsi Anda punya view detail terpisah
+            res.render("admin/historyDetail", { 
                 title: "Riwayat Laporan Detail Admin",
                 user,
                 report,
@@ -142,7 +136,6 @@ class HistoryController {
     async downloadReportPdf(req, res) {
         try {
             const id = req.params.id;
-            // Filter email agar user hanya bisa mendownload laporannya sendiri
             const laporan = await this.#getReportById(id, req.user.email); 
 
             if (!laporan) return res.status(404).send("Data laporan tidak ditemukan atau bukan milik Anda.");
@@ -151,7 +144,6 @@ class HistoryController {
 
             res.download(outputPdf, `laporan_${id}.pdf`, (downloadErr) => {
                 if (downloadErr) console.error("⚠️ Gagal kirim file:", downloadErr);
-                // Pastikan cleanup tetap dipanggil setelah download
                 this.documentService.cleanup(outputDocx, outputPdf); 
             });
         } catch (error) {
