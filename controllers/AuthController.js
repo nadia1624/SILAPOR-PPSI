@@ -51,7 +51,7 @@ class AuthController {
         return strongPassword.test(password);
     }
 
-    async #processPasswordChange(req, res, viewName, isAdmin = false) {
+    async #processPasswordChange(req, res, viewName, isAdmin) {
         const { old_password, password, confirm_password } = req.body;
         const userEmail = req.user.email; // Asumsi req.user sudah ada dari middleware otentikasi
 
