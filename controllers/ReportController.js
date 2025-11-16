@@ -16,25 +16,25 @@ class ReportController {
         this.reportService = new ReportService();
 
         // Binding semua method
-        this.showReportForm = this.showReportForm.bind(this);
-        this.showAdminReportForm = this.showAdminReportForm.bind(this);
-        this.getAdminReports = this.getAdminReports.bind(this);
-        this.createReport = this.createReport.bind(this);
-        this.createReportAdmin = this.createReportAdmin.bind(this);
-        this.getUserReports = this.getUserReports.bind(this);
-        this.getDashboard = this.getDashboard.bind(this);
-        this.getAllReportsUser = this.getAllReportsUser.bind(this);
-        this.getAllReportsAdmin = this.getAllReportsAdmin.bind(this);
-        this.claimReport = this.claimReport.bind(this);
-        this.updateReport = this.updateReport.bind(this);
-        this.updateReportAdmin = this.updateReportAdmin.bind(this);
-        this.deleteReport = this.deleteReport.bind(this);
-        this.deleteReportAdmin = this.deleteReportAdmin.bind(this);
-        this.acceptClaim = this.acceptClaim.bind(this);
-        this.acceptClaimAdmin = this.acceptClaimAdmin.bind(this);
-        this.reapplyReport = this.reapplyReport.bind(this);
-        this.reapplyReportAdmin = this.reapplyReportAdmin.bind(this);
-        this.rejectClaim = this.rejectClaim.bind(this);
+        this.showReportForm = this.showReportForm.bind(this); //done
+        this.showAdminReportForm = this.showAdminReportForm.bind(this); //done
+        this.getAdminReports = this.getAdminReports.bind(this); //done
+        this.createReport = this.createReport.bind(this); //done
+        this.createReportAdmin = this.createReportAdmin.bind(this); //done
+        this.getUserReports = this.getUserReports.bind(this); //private
+        this.getDashboard = this.getDashboard.bind(this); //done
+        this.getAllReportsUser = this.getAllReportsUser.bind(this); //done
+        this.getAllReportsAdmin = this.getAllReportsAdmin.bind(this); //done
+        this.claimReport = this.claimReport.bind(this); //done
+        this.updateReport = this.updateReport.bind(this); //done
+        this.updateReportAdmin = this.updateReportAdmin.bind(this); //done
+        this.deleteReport = this.deleteReport.bind(this); //done
+        this.deleteReportAdmin = this.deleteReportAdmin.bind(this); //done
+        this.acceptClaim = this.acceptClaim.bind(this); //done
+        this.acceptClaimAdmin = this.acceptClaimAdmin.bind(this); //done
+        this.reapplyReport = this.reapplyReport.bind(this); //done
+        this.reapplyReportAdmin = this.reapplyReportAdmin.bind(this); //done
+        this.rejectClaim = this.rejectClaim.bind(this); //done
     }
 
     // --- METODE UTILITY (Private/Helper) ---
@@ -293,7 +293,7 @@ class ReportController {
                 const adminEmail = req.user.email;
                 
                 // Filter hanya laporan yang dibuat oleh admin ini
-                const reports = await this.getReportsWithIncludes({ email: adminEmail });
+                const reports = await this.#getReportsWithIncludes({ email: adminEmail });
                 const user = await this.User.findOne({ where: { email: adminEmail } });
 
                 res.render("admin/my-reports", { title: "Laporan Saya - Admin", reports, user, success: req.query.success });
@@ -306,7 +306,7 @@ class ReportController {
     async getAllReportsUser(req, res) {
         try {
             // Tampilkan laporan untuk user umum/non-admin (Status On Progress)
-            const reports = await this.getReportsWithIncludes({ status: "On Progress" });
+            const reports = await this.#getReportsWithIncludes({ status: "On Progress" });
             const user = req.user && req.user.email ? await this.User.findOne({ where: { email: req.user.email } }) : null;
 
             res.render("home", { reports, user });
@@ -319,7 +319,7 @@ class ReportController {
     async getAllReportsAdmin(req, res) {
         try {
             // Tampilkan laporan untuk admin (Status On Progress)
-            const reports = await this.getReportsWithIncludes({ status: "On Progress" });
+            const reports = await this.#getReportsWithIncludes({ status: "On Progress" });
             const user = await this.User.findOne({ where: { email: req.user.email } });
 
             res.render("admin/report", { reports, user });
