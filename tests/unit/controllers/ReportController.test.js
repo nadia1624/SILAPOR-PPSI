@@ -397,17 +397,133 @@ describe("ReportController - createReportAdmin", () => {
   });
 });
 
+  describe("ReportController - getUserReports", () => {
+  let controller;
+  let req;
+  let res;
 
+  beforeEach(() => {
+    controller = new ReportController({
+      Laporan: mockLaporan,
+      User: mockUser,
+      Claim: mockClaim,
+    });
 
+    req = {
+      user: { email: "test@example.com", role: "user" },
+    };
 
+    res = {
+      status: jest.fn().mockReturnThis(),
+      render: jest.fn(),
+      send: jest.fn(),
+    };
 
+    jest.clearAllMocks();
+  });
 
+  test("should render 'my-reports' with reports and user data", async () => {
+    const mockReports = [{ id_laporan: 1, nama_barang: "Laptop" }];
+    const mockUserData = { email: "test@example.com", nama: "Test User" };
 
-  describe("ReportController - getAllReportsUser", () => {
-  
+    controller.Laporan.findAll = jest.fn().mockResolvedValue(mockReports);
+    mockUser.findOne.mockResolvedValue(mockUserData);
+
+    await controller.getUserReports(req, res);
+
+    expect(controller.Laporan.findAll).toHaveBeenCalled();
+    expect(mockUser.findOne).toHaveBeenCalledWith({ where: { email: "test@example.com" } });
+    expect(res.render).toHaveBeenCalledWith("my-reports", {
+      title: "Laporan Saya",
+      reports: mockReports,
+      user: mockUserData,
+    });
+  });
+
+  test("should render error page if an exception occurs", async () => {
+    controller.Laporan.findAll = jest.fn().mockRejectedValue(new Error("DB error"));
+
+    await controller.getUserReports(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.render).toHaveBeenCalledWith("error", {
+      message: "Terjadi kesalahan saat memuat data laporan",
+    });
+  });
+});
+
+describe("ReportController - getAllReportsUser", () => {
+  let controller;
+  let req;
+  let res;
+
+  beforeEach(() => {
+    controller = new ReportController({
+      Laporan: mockLaporan,
+      User: mockUser,
+      Claim: mockClaim,
+    });
+
+    req = {
+      user: { email: "test@example.com", role: "user" },
+    };
+
+    res = {
+      status: jest.fn().mockReturnThis(),
+      render: jest.fn(),
+      send: jest.fn(),
+    };
+
+    jest.clearAllMocks();
+  });
+
+  test("should render 'home' with reports and user data when user exists", async () => {
+    const mockReports = [{ id_laporan: 1, nama_barang: "Laptop" }];
+    const mockUserData = { email: "test@example.com", nama: "Test User" };
+
+    controller.Laporan.findAll = jest.fn().mockResolvedValue(mockReports);
+    mockUser.findOne.mockResolvedValue(mockUserData);
+
+    await controller.getAllReportsUser(req, res);
+
+    expect(controller.Laporan.findAll).toHaveBeenCalled();
+    expect(mockUser.findOne).toHaveBeenCalledWith({ where: { email: "test@example.com" } });
+    expect(res.render).toHaveBeenCalledWith("home", {
+      reports: mockReports,
+      user: mockUserData,
+    });
+  });
+
+  test("should render 'home' with reports and null user when user not found", async () => {
+    const mockReports = [{ id_laporan: 1, nama_barang: "Laptop" }];
+
+    controller.Laporan.findAll = jest.fn().mockResolvedValue(mockReports);
+    mockUser.findOne.mockResolvedValue(null);
+
+    await controller.getAllReportsUser(req, res);
+
+    expect(res.render).toHaveBeenCalledWith("home", {
+      reports: mockReports,
+      user: null,
+    });
+  });
+
+  test("should render 'home' with null user when req.user is undefined", async () => {
+    const mockReports = [{ id_laporan: 1, nama_barang: "Laptop" }];
+    req.user = undefined;
+
+    controller.Laporan.findAll = jest.fn().mockResolvedValue(mockReports);
+
+    await controller.getAllReportsUser(req, res);
+
+    expect(res.render).toHaveBeenCalledWith("home", {
+      reports: mockReports,
+      user: null,
+    });
+  });
 
   test("should send 500 if User.findOne throws", async () => {
-    controller.getReportsWithIncludes = jest.fn().mockResolvedValue([{ id_laporan: 3 }]);
+    controller.Laporan.findAll = jest.fn().mockResolvedValue([{ id_laporan: 3 }]);
     mockUser.findOne.mockRejectedValue(new Error("DB error"));
 
     await controller.getAllReportsUser(req, res);
@@ -415,12 +531,6 @@ describe("ReportController - createReportAdmin", () => {
     expect(res.status).toHaveBeenCalledWith(500);
     expect(res.send).toHaveBeenCalledWith("Terjadi kesalahan pada server");
   });
-
-
-
-
-
-
 });
 
 describe("ReportController - getAllReportsAdmin", () => {
@@ -450,10 +560,25 @@ describe("ReportController - getAllReportsAdmin", () => {
     jest.clearAllMocks();
   });
 
-  
+  test("should render 'admin/report' with reports and user data", async () => {
+    const mockReports = [{ id_laporan: 1, nama_barang: "Laptop" }];
+    const mockUserData = { email: "admin@example.com", nama: "Admin User" };
+
+    controller.Laporan.findAll = jest.fn().mockResolvedValue(mockReports);
+    mockUser.findOne.mockResolvedValue(mockUserData);
+
+    await controller.getAllReportsAdmin(req, res);
+
+    expect(controller.Laporan.findAll).toHaveBeenCalled();
+    expect(mockUser.findOne).toHaveBeenCalledWith({ where: { email: "admin@example.com" } });
+    expect(res.render).toHaveBeenCalledWith("admin/report", {
+      reports: mockReports,
+      user: mockUserData,
+    });
+  });
 
   test("should send 500 if User.findOne throws", async () => {
-    controller.getReportsWithIncludes = jest.fn().mockResolvedValue([{ id_laporan: 3 }]);
+    controller.Laporan.findAll = jest.fn().mockResolvedValue([{ id_laporan: 3 }]);
     mockUser.findOne.mockRejectedValue(new Error("DB error"));
 
     await controller.getAllReportsAdmin(req, res);
