@@ -130,6 +130,20 @@ describe("HistoryController — Standard Unit Test", () => {
             spyPriv.mockRestore();
         });
 
+        test("should render with null user when user not found", async () => {
+            mockModels.Laporan.findAll.mockResolvedValue([{ id: 1 }]);
+            mockModels.User.findOne.mockResolvedValue(null);
+
+            await controller.getDoneReportsAdmin(req, res);
+
+            expect(res.render).toHaveBeenCalledWith("admin/history", {
+                reports: [{ id: 1 }],
+                user: null,
+                filterJenis: undefined,
+                searchNama: undefined
+            });
+        });
+
         test("should return 500 when error thrown", async () => {
             mockModels.Laporan.findAll.mockRejectedValue(new Error("DB Error"));
 
@@ -231,6 +245,48 @@ describe("HistoryController — Standard Unit Test", () => {
             expect(res.download).toHaveBeenCalled();
         });
 
+        test("should handle successful download", async () => {
+            mockModels.Laporan.findOne.mockResolvedValue({ id_laporan: 1 });
+            const mockCleanup = jest.fn();
+            DocumentService.mockImplementation(() => ({
+                generatePdf: jest.fn().mockResolvedValue({
+                    outputPdf: "file.pdf",
+                    outputDocx: "file.docx"
+                }),
+                cleanup: mockCleanup,
+            }));
+
+            controller = new HistoryController(mockModels);
+
+            req.params.id = 1;
+            res.download = jest.fn((path, filename, cb) => cb(null));
+
+            await controller.downloadReportPdf(req, res);
+
+            expect(mockCleanup).toHaveBeenCalled();
+        });
+
+        test("should handle download error in callback", async () => {
+            mockModels.Laporan.findOne.mockResolvedValue({ id_laporan: 1 });
+            const mockCleanup = jest.fn();
+            DocumentService.mockImplementation(() => ({
+                generatePdf: jest.fn().mockResolvedValue({
+                    outputPdf: "file.pdf",
+                    outputDocx: "file.docx"
+                }),
+                cleanup: mockCleanup,
+            }));
+
+            controller = new HistoryController(mockModels);
+
+            req.params.id = 1;
+            res.download = jest.fn((path, filename, cb) => cb(new Error("Download error")));
+
+            await controller.downloadReportPdf(req, res);
+
+            expect(mockCleanup).toHaveBeenCalled();
+        });
+
         test("should return 500 on error", async () => {
             mockModels.Laporan.findOne.mockRejectedValue(new Error("Error"));
 
@@ -268,6 +324,48 @@ describe("HistoryController — Standard Unit Test", () => {
             await controller.downloadReportPdfAdmin(req, res);
 
             expect(res.download).toHaveBeenCalled();
+        });
+
+        test("should handle successful download", async () => {
+            mockModels.Laporan.findOne.mockResolvedValue({ id_laporan: 1 });
+            const mockCleanup = jest.fn();
+            DocumentService.mockImplementation(() => ({
+                generatePdf: jest.fn().mockResolvedValue({
+                    outputPdf: "file.pdf",
+                    outputDocx: "file.docx"
+                }),
+                cleanup: mockCleanup,
+            }));
+
+            controller = new HistoryController(mockModels);
+
+            req.params.id = 1;
+            res.download = jest.fn((path, filename, cb) => cb(null));
+
+            await controller.downloadReportPdfAdmin(req, res);
+
+            expect(mockCleanup).toHaveBeenCalled();
+        });
+
+        test("should handle download error in callback", async () => {
+            mockModels.Laporan.findOne.mockResolvedValue({ id_laporan: 1 });
+            const mockCleanup = jest.fn();
+            DocumentService.mockImplementation(() => ({
+                generatePdf: jest.fn().mockResolvedValue({
+                    outputPdf: "file.pdf",
+                    outputDocx: "file.docx"
+                }),
+                cleanup: mockCleanup,
+            }));
+
+            controller = new HistoryController(mockModels);
+
+            req.params.id = 1;
+            res.download = jest.fn((path, filename, cb) => cb(new Error("Download error")));
+
+            await controller.downloadReportPdfAdmin(req, res);
+
+            expect(mockCleanup).toHaveBeenCalled();
         });
 
         test("should return 500 on error", async () => {

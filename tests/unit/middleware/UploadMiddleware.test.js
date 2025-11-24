@@ -92,6 +92,15 @@ describe("UploadMiddleware", () => {
         expect(cb).toHaveBeenCalledWith(expect.any(Error), false);
     });
 
+    test("should set correct destination directory", () => {
+        const mockCb = jest.fn();
+        const storage = uploadMiddleware.createStorageEngine();
+
+        storage.destination({}, {}, mockCb);
+
+        expect(mockCb).toHaveBeenCalledWith(null, uploadDir);
+    });
+
     test("should generate valid filename with correct extension", () => {
         const mockCb = jest.fn();
         const storage = uploadMiddleware.createStorageEngine(); 
