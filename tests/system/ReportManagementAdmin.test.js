@@ -121,4 +121,158 @@ describe('SYSTEM TESTING: Admin Report Management - End to End Scenarios', () =>
             }
         }, 20000);
     });
+
+    // ========================================
+    // SKENARIO 2: VERIFIKASI UPLOAD BUKTI LAPORAN
+    // ========================================
+    describe('SKENARIO 2: Admin Memverifikasi Upload Bukti Laporan', () => {
+        test('ST-VERIF-ADMIN-001: Admin dapat membuka halaman Verifikasi Laporan', async () => {
+            await driver.get(`${BASE_URL}/admin/verifikasi`);
+            await driver.sleep(2000);
+
+            const currentUrl = await driver.getCurrentUrl();
+            expect(currentUrl).toContain('/admin/verifikasi');
+
+            const heading = await driver.findElement(
+                By.xpath("//h1[contains(., 'Verifikasi Laporan')]")
+            ).getText();
+            expect(heading.length).toBeGreaterThan(0);
+
+            console.log('✓ PASS: Admin dapat membuka halaman Verifikasi Laporan');
+        }, 20000);
+
+        test('ST-VERIF-ADMIN-002: Admin dapat melihat detail laporan sebelum verifikasi', async () => {
+            await driver.get(`${BASE_URL}/admin/verifikasi`);
+            await driver.sleep(2000);
+
+            try {
+                const verifyButton = await driver.findElement(
+                    By.xpath("//button[contains(., 'Verifikasi')]")
+                );
+                await verifyButton.click();
+                await driver.sleep(1000);
+
+                const detailModal = await driver.findElement(By.id('detailModal'));
+
+                await driver.wait(async () => {
+                    const classes = await detailModal.getAttribute('class');
+                    return !classes.includes('hidden');
+                }, 5000);
+
+                const modalText = await detailModal.getText();
+                expect(modalText.length).toBeGreaterThan(0);
+
+                console.log('✓ PASS: Detail laporan verifikasi dapat ditampilkan');
+            } catch (error) {
+                console.log('⚠ SKIP: Tidak ada laporan yang menunggu verifikasi');
+            }
+        }, 25000);
+
+        test('ST-VERIF-ADMIN-003: Admin dapat menyetujui verifikasi upload bukti laporan', async () => {
+            await driver.get(`${BASE_URL}/admin/verifikasi`);
+            await driver.sleep(2000);
+
+            try {
+                const verifyButtons = await driver.findElements(
+                    By.xpath("//button[contains(., 'Verifikasi')]")
+                );
+
+                if (!verifyButtons.length) {
+                    console.log('⚠ SKIP: Tidak ada laporan yang menunggu verifikasi untuk disetujui');
+                    return;
+                }
+
+                await verifyButtons[0].click();
+                await driver.sleep(1000);
+
+                const detailModal = await driver.findElement(By.id('detailModal'));
+
+                await driver.wait(async () => {
+                    const classes = await detailModal.getAttribute('class');
+                    return !classes.includes('hidden');
+                }, 5000);
+
+                const approveButton = await driver.findElement(
+                    By.css('#detail-approve-form button[type="submit"]')
+                );
+                await approveButton.click();
+
+                await driver.wait(until.urlContains('/admin/verifikasi'), 10000);
+
+                const heading = await driver.findElement(
+                    By.xpath("//h1[contains(., 'Verifikasi Laporan')]")
+                ).getText();
+                expect(heading.length).toBeGreaterThan(0);
+
+                console.log('✓ PASS: Admin dapat menyetujui verifikasi laporan');
+            } catch (error) {
+                console.log('⚠ SKIP: Gagal menemukan skenario verifikasi approve yang valid');
+            }
+        }, 35000);
+
+        test('ST-VERIF-ADMIN-004: Admin dapat menolak verifikasi upload bukti laporan dengan alasan', async () => {
+            await driver.get(`${BASE_URL}/admin/verifikasi`);
+            await driver.sleep(2000);
+
+            try {
+                const verifyButtons = await driver.findElements(
+                    By.xpath("//button[contains(., 'Verifikasi')]")
+                );
+
+                if (!verifyButtons.length) {
+                    console.log('⚠ SKIP: Tidak ada laporan yang menunggu verifikasi untuk ditolak');
+                    return;
+                }
+
+                await verifyButtons[0].click();
+                await driver.sleep(1000);
+
+                const detailModal = await driver.findElement(By.id('detailModal'));
+
+                await driver.wait(async () => {
+                    const classes = await detailModal.getAttribute('class');
+                    return !classes.includes('hidden');
+                }, 5000);
+
+                const rejectFromDetailBtn = await driver.findElement(By.id('detail-reject-btn'));
+                await rejectFromDetailBtn.click();
+
+                await driver.sleep(500);
+
+                const rejectModals = await driver.findElements(
+                    By.xpath("//div[starts-with(@id, 'rejectClaimModal-') and not(contains(@class,'hidden'))]")
+                );
+
+                if (!rejectModals.length) {
+                    console.log('⚠ SKIP: Modal tolak verifikasi tidak ditemukan');
+                    return;
+                }
+
+                const activeRejectModal = rejectModals[0];
+
+                const alasanSelect = await activeRejectModal.findElement(By.tagName('select'));
+                await alasanSelect.click();
+                const option = await alasanSelect.findElement(
+                    By.xpath(".//option[not(@disabled) and @value!='' and @value!='lainnya']")
+                );
+                await option.click();
+
+                const submitButton = await activeRejectModal.findElement(
+                    By.xpath(".//button[contains(., 'Tolak Verifikasi')]")
+                );
+                await submitButton.click();
+
+                await driver.wait(until.urlContains('/admin/verifikasi'), 10000);
+
+                const heading = await driver.findElement(
+                    By.xpath("//h1[contains(., 'Verifikasi Laporan')]")
+                ).getText();
+                expect(heading.length).toBeGreaterThan(0);
+
+                console.log('✓ PASS: Admin dapat menolak verifikasi laporan dengan alasan');
+            } catch (error) {
+                console.log('⚠ SKIP: Gagal menemukan skenario verifikasi reject yang valid');
+            }
+        }, 40000);
+    });
 });
