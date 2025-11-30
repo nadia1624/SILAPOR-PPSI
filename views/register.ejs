@@ -346,7 +346,8 @@
 
     <!-- Warning Password Lemah -->
     <div id="password-warning" 
-         class="hidden absolute top-full mt-2 right-0 w-72 z-50
+         style="display: none;"
+         class="absolute top-full mt-2 right-0 w-72 z-50
                 bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 text-sm border border-red-200 dark:border-red-800 
                 rounded-lg p-3 shadow-lg">
       ⚠️ Kata sandi lemah.<br>
@@ -435,7 +436,8 @@
 
     <!-- Warning Confirm Password -->
     <div id="confirm-warning" 
-         class="hidden absolute top-full mt-2 right-0 w-72 z-50
+         style="display: none;"
+         class="absolute top-full mt-2 right-0 w-72 z-50
                 bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 text-sm border border-red-200 dark:border-red-800 
                 rounded-lg p-3 shadow-lg">
       ⚠️ Kata sandi tidak cocok dengan yang di atas.
@@ -454,25 +456,25 @@
     const value = passwordInput.value;
     const strongPassword = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/;
     if (value && !strongPassword.test(value)) {
-      warning.classList.remove("hidden");
+      warning.style.display = "block";
     } else {
-      warning.classList.add("hidden");
+      warning.style.display = "none";
     }
   });
   passwordInput.addEventListener("blur", () => {
-    warning.classList.add("hidden");
+    warning.style.display = "none";
   });
 
   // Validasi confirm password
   confirmInput.addEventListener("input", () => {
     if (confirmInput.value && confirmInput.value !== passwordInput.value) {
-      confirmWarning.classList.remove("hidden");
+      confirmWarning.style.display = "block";
     } else {
-      confirmWarning.classList.add("hidden");
+      confirmWarning.style.display = "none";
     }
   });
   confirmInput.addEventListener("blur", () => {
-    confirmWarning.classList.add("hidden");
+    confirmWarning.style.display = "none";
   });
 
   // Client-side validation before submit
@@ -564,7 +566,7 @@
               href="/login"
               class="text-[#16a34a] hover:text-[#15803d] dark:text-green-400 dark:hover:text-green-300 font-semibold transition-colors"
             >
-              Masuk di sini
+              Login di sini
             </a>
           </p>
         </div>
