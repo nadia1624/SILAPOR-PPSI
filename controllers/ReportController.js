@@ -1,5 +1,3 @@
-// controllers/ReportController.js
-
 const { where } = require("sequelize");
 const path = require("path");
 const fs = require("fs");
