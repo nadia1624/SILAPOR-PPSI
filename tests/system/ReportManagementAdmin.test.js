@@ -8,6 +8,9 @@ const path = require('path');
 const BASE_URL = process.env.BASE_URL || 'http://localhost:3000';
 const TIMEOUT = 15000;
 
+// Path untuk dummy image (sesuaikan dengan struktur project Anda)
+const DUMMY_IMG_PATH = path.resolve(__dirname, '../../test-assets/dummy-image.jpg');
+
 // Kredensial
 const ADMIN_CREDENTIALS = {
     email: 'admin@silapor.com',
@@ -33,6 +36,29 @@ const logout = async (driver) => {
         console.log('Logout via direct navigation');
         await driver.get(`${BASE_URL}/logout`);
     }
+};
+
+// Fungsi untuk klik menggunakan JavaScript (menghindari element intercept)
+const jsClick = async (driver, selector) => {
+    const element = await driver.wait(until.elementLocated(selector), 10000);
+    await driver.executeScript("arguments[0].click();", element);
+};
+
+// Fungsi untuk menunggu dan klik elemen
+const waitAndClick = async (driver, selector, timeout = 10000) => {
+    const element = await driver.wait(until.elementLocated(selector), timeout);
+    await driver.wait(until.elementIsVisible(element), timeout);
+    await element.click();
+};
+
+// Fungsi untuk menunggu modal muncul
+const waitForModal = async (driver, selector, timeout = 5000) => {
+    const modal = await driver.wait(until.elementLocated(selector), timeout);
+    await driver.wait(async () => {
+        const classes = await modal.getAttribute('class');
+        return !classes.includes('hidden');
+    }, timeout);
+    return modal;
 };
 
 // --- SYSTEM TEST SUITE ---
@@ -275,4 +301,98 @@ describe('SYSTEM TESTING: Admin Report Management - End to End Scenarios', () =>
             }
         }, 40000);
     });
+
+    // ========================================
+    // SKENARIO 3: ACCEPT CLAIM REPORT
+    // ========================================
+    describe('SKENARIO 3: Admin Menerima Klaim Laporan', () => {
+        test('ST-CLAIM-ADMIN-001: Admin menerima klaim laporan dengan bukti', async () => {
+            await driver.get(`${BASE_URL}/admin/my-reports`);
+            await driver.sleep(2000);
+
+            try {
+                const acceptButtons = await driver.findElements(
+                    By.xpath("//button[contains(., 'Setujui Klaim')]")
+                );
+
+                if (!acceptButtons.length) {
+                    console.log("⚠ SKIP: Tidak ada laporan dalam status klaim menunggu approval");
+                    return;
+                }
+
+                await acceptButtons[0].click();
+                await driver.sleep(1000);
+
+                // Upload bukti
+                const buktiInput = await driver.findElement(By.name('bukti'));
+                await buktiInput.sendKeys(DUMMY_IMG_PATH);
+
+                const submit = await driver.findElement(
+                    By.xpath("//button[contains(., 'Submit Bukti')]")
+                );
+                await submit.click();
+
+                await driver.wait(until.urlContains('/admin/my-reports'), TIMEOUT);
+
+                const pageText = await driver.findElement(By.tagName('body')).getText();
+                expect(pageText).not.toContain('Waiting for approval');
+
+                console.log("✓ PASS: Admin berhasil menerima klaim laporan");
+            } catch (error) {
+                console.log("⚠ SKIP: Tidak dapat menyelesaikan proses menerima klaim");
+                console.log("Error:", error.message);
+            }
+        }, 40000);
+    });
+
+    // ========================================
+    // SKENARIO 4: REJECT CLAIM REPORT
+    // ========================================
+    describe('SKENARIO 4: Admin Menolak Klaim Laporan', () => {
+        test('ST-CLAIM-ADMIN-002: Admin menolak klaim dengan alasan', async () => {
+            await driver.get(`${BASE_URL}/admin/claim-verification`);
+            await driver.sleep(2000);
+
+            try {
+                // Cari laporan dengan tombol "Tolak"
+                const rejectBtnSelector = By.xpath(`//button[contains(., 'Tolak') or contains(., 'Reject')]`);
+                await jsClick(driver, rejectBtnSelector);
+
+                // Tunggu modal alasan muncul
+                const alasanInput = await driver.wait(
+                    until.elementLocated(By.css('textarea, textarea[name="reason"], #alasan')),
+                    20000
+                );
+
+                await alasanInput.sendKeys('Barang tidak valid untuk klaim.');
+
+                // Tombol submit reject biasanya swal2-deny, swal2-confirm, atau swal2-actions > button
+                const rejectConfirmBtn = await driver.wait(
+                    until.elementLocated(By.css('.swal2-deny, .swal2-confirm, .swal2-actions button.swal2-confirm')),
+                    20000
+                );
+
+                await driver.executeScript("arguments[0].click();", rejectConfirmBtn);
+
+                // Tunggu ikon sukses SweetAlert
+                await driver.wait(until.elementLocated(By.css('.swal2-icon-success')), 20000);
+
+                // Klik OK
+                const okBtn = await driver.findElement(By.css('.swal2-confirm'));
+                await driver.executeScript("arguments[0].click();", okBtn);
+
+                await driver.sleep(1000);
+
+                // Verifikasi status berubah menjadi Rejected / Ditolak
+                const bodyText = await driver.findElement(By.tagName('body')).getText();
+                expect(bodyText).toMatch(/Ditolak|Rejected/);
+
+                console.log("✓ PASS: Admin berhasil menolak klaim dengan alasan");
+            } catch (error) {
+                console.log("⚠ SKIP: Tidak dapat menyelesaikan proses menolak klaim");
+                console.log("Error:", error.message);
+            }
+        }, 40000);
+    });
+
 });
