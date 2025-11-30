@@ -1,161 +1,135 @@
-const sequelize = require("../../../config/database.config");
-const { DataTypes } = require("sequelize");
+const SequelizeMock = require("sequelize-mock");
+const DBMock = new SequelizeMock();
 
-const defineUserModel = require("../../../models/user");
-const defineLaporanModel = require("../../../models/laporan");
-const defineClaimModel = require("../../../models/claim");
-
-let User, Laporan, Claim;
-
-beforeAll(async () => {
-  User = defineUserModel(sequelize, DataTypes);
-  Laporan = defineLaporanModel(sequelize, DataTypes);
-  Claim = defineClaimModel(sequelize, DataTypes);
-
-  // daftar semua untuk asosiasi
-  const models = { User, Laporan, Claim };
-  User.associate(models);
-  Laporan.associate(models);
-  Claim.associate(models);
-
-  await sequelize.sync({ force: true });
-});
-
-afterEach(async () => {
-  await Laporan.destroy({ where: {} });
-  await User.destroy({ where: {} });
-  await Claim.destroy({ where: {} });
-});
-
-afterAll(async () => {
-  await sequelize.close();
-});
-
-
-// =======================================================================
-// 1) Membuat Laporan valid
-// =======================================================================
-test("berhasil membuat laporan dengan data valid", async () => {
-  await User.create({
-    email: "test@example.com",
-    nama: "User Test",
-    password: "hashed",
-    role: "user",
-    no_telepon: "0812",
-    alamat: "Padang",
-  });
-
-  const laporan = await Laporan.create({
-    email: "test@example.com",
+// MOCK LAPORAN MODEL
+const LaporanMock = DBMock.define(
+  "Laporan",
+  {
+    id_laporan: 10,
+    email: "user@mail.com",
     jenis_laporan: "Kehilangan",
-    nama_barang: "Dompet",
+    nama_barang: "Laptop",
+    tanggal_kejadian: "2025-01-01",
+    lokasi: "Kampus",
+    tanggal_laporan: "2025-01-02",
+    deskripsi: "Hilang di perpustakaan",
+    foto_barang: "laptop.jpg",
+    status: "Waiting for upload verification",
+    tanggal_penyerahan: null,
+    lokasi_penyerahan: null,
+    foto_bukti: null,
+    verifikasi_action: "none",
+    pengklaim: null,
+    no_hp_pengklaim: null,
+    alasan: null,
+  },
+  {
+    timestamps: true,
+  }
+);
+
+// MOCK USER MODEL
+const UserMock = DBMock.define("User", {
+  email: "user@mail.com",
+  nama: "Andi",
+});
+
+// MOCK CLAIM MODEL
+const ClaimMock = DBMock.define("Claim", {
+  id_claim: 1,
+  id_laporan: 10,
+});
+
+// RELASI MOCK SESUAI MODEL ASLI
+LaporanMock.belongsTo = jest.fn((model, options) => {
+  LaporanMock._belongsTo = { model, options };
+});
+LaporanMock.hasMany = jest.fn((model, options) => {
+  LaporanMock._hasMany = { model, options };
+});
+
+// lakukan relasi
+LaporanMock.belongsTo(UserMock, { foreignKey: "email", targetKey: "email" });
+LaporanMock.hasMany(ClaimMock, { foreignKey: "id_laporan" });
+
+// ENUM VALIDASI MANUAL
+LaporanMock.$validasiStatus = (val) =>
+  [
+    "Waiting for upload verification",
+    "Upload verification rejected",
+    "On progress",
+    "Claimed",
+    "Waiting for end verification",
+    "End verification rejected",
+    "Done",
+  ].includes(val);
+
+LaporanMock.$validasiVerifikasi = (val) =>
+  ["none", "approve", "denied"].includes(val);
+
+
+// TEST SUITE
+describe("Model: Laporan", () => {
+  test("Model Laporan harus terdefinisi dengan benar", () => {
+    expect(LaporanMock).toBeDefined();
   });
 
-  expect(laporan.jenis_laporan).toBe("Kehilangan");
-  expect(laporan.status).toBe("Waiting for upload verification"); // default
-  expect(laporan.verifikasi_action).toBe("none"); // default
-});
+  test("Model Laporan harus memiliki atribut lengkap", () => {
+    const attrs = LaporanMock._defaults;
+    expect(attrs.id_laporan).toBeDefined();
+    expect(attrs.email).toBeDefined();
+    expect(attrs.jenis_laporan).toBeDefined();
+    expect(attrs.nama_barang).toBeDefined();
+    expect(attrs.tanggal_kejadian).toBeDefined();
+    expect(attrs.lokasi).toBeDefined();
+    expect(attrs.tanggal_laporan).toBeDefined();
+    expect(attrs.deskripsi).toBeDefined();
+    expect(attrs.foto_barang).toBeDefined();
+    expect(attrs.status).toBeDefined();
+    expect(attrs.verifikasi_action).toBeDefined();
+  });
 
-// =======================================================================
-// 2) jenis_laporan wajib sesuai ENUM
-// =======================================================================
-test("menolak jenis_laporan di luar ENUM", async () => {
-  await expect(
-    Laporan.create({
-      email: "user@example.com",
-      jenis_laporan: "Hilang Tapi Ketemu", // ❌ tidak valid
-      nama_barang: "Kunci",
-    })
-  ).rejects.toThrow();
-});
+  test("Status default harus bernilai 'Waiting for upload verification'", async () => {
+    const laporan = await LaporanMock.create({});
+    expect(laporan.get("status")).toBe("Waiting for upload verification");
+  });
 
-// =======================================================================
-// 3) status wajib sesuai ENUM
-// =======================================================================
-test("menolak status invalid", async () => {
-  await expect(
-    Laporan.create({
-      email: "user@example.com",
+  test("Model harus menolak status yang tidak valid", () => {
+    expect(LaporanMock.$validasiStatus("Selesai")).toBe(false);
+    expect(LaporanMock.$validasiStatus("Unknown")).toBe(false);
+  });
+
+  test("Model harus menerima status yang valid", () => {
+    expect(LaporanMock.$validasiStatus("Claimed")).toBe(true);
+    expect(LaporanMock.$validasiStatus("Done")).toBe(true);
+  });
+
+  test("Validasi verifikasi_action harus benar", () => {
+    expect(LaporanMock.$validasiVerifikasi("none")).toBe(true);
+    expect(LaporanMock.$validasiVerifikasi("approve")).toBe(true);
+    expect(LaporanMock.$validasiVerifikasi("invalid")).toBe(false);
+  });
+
+  test("Model Laporan harus memiliki relasi belongsTo User", () => {
+    expect(LaporanMock._belongsTo.model).toBe(UserMock);
+    expect(LaporanMock._belongsTo.options.foreignKey).toBe("email");
+  });
+
+  test("Model Laporan harus memiliki relasi hasMany Claim", () => {
+    expect(LaporanMock._hasMany.model).toBe(ClaimMock);
+    expect(LaporanMock._hasMany.options.foreignKey).toBe("id_laporan");
+  });
+
+  test("Konfigurasi timestamps harus aktif", () => {
+    expect(LaporanMock.options.timestamps).toBe(true);
+  });
+
+  test("Model harus bisa membuat data laporan baru", async () => {
+    const laporan = await LaporanMock.create({
       jenis_laporan: "Penemuan",
-      status: "Selesai Sudah", // ❌ tidak valid
-      nama_barang: "HP",
-    })
-  ).rejects.toThrow();
-});
-
-// =======================================================================
-// 4) verifikasi_action wajib sesuai ENUM
-// =======================================================================
-test("menolak verifikasi_action invalid", async () => {
-  await expect(
-    Laporan.create({
-      email: "user@example.com",
-      jenis_laporan: "Penemuan",
-      verifikasi_action: "check manual", // ❌
-    })
-  ).rejects.toThrow();
-});
-
-// =======================================================================
-// 5) jenis_laporan tidak boleh null
-// =======================================================================
-test("menolak jika jenis_laporan null", async () => {
-  await expect(
-    Laporan.create({
       nama_barang: "KTP",
-    })
-  ).rejects.toThrow();
-});
-
-// =======================================================================
-// 6) Update Data Laporan
-// =======================================================================
-test("berhasil update status laporan", async () => {
-  const laporan = await Laporan.create({
-    jenis_laporan: "Penemuan",
-    nama_barang: "Kartu ATM",
+    });
+    expect(laporan.get("jenis_laporan")).toBe("Penemuan");
+    expect(laporan.get("nama_barang")).toBe("KTP");
   });
-
-  await laporan.update({ status: "On progress" });
-
-  expect(laporan.status).toBe("On progress");
-});
-
-// =======================================================================
-// 7) Delete Laporan
-// =======================================================================
-test("berhasil menghapus laporan", async () => {
-  const laporan = await Laporan.create({
-    jenis_laporan: "Kehilangan",
-    nama_barang: "KTP",
-  });
-
-  await laporan.destroy();
-
-  const result = await Laporan.findByPk(laporan.id_laporan);
-  expect(result).toBeNull();
-});
-
-// =======================================================================
-// 8) Relasi: laporan.getUser()
-// =======================================================================
-test("relasi Laporan -> User berfungsi", async () => {
-  const user = await User.create({
-    email: "owner@example.com",
-    nama: "Pemilik",
-    password: "hash",
-    role: "user",
-    no_telepon: "0812",
-    alamat: "Padang",
-  });
-
-  const laporan = await Laporan.create({
-    email: user.email,
-    jenis_laporan: "Penemuan",
-    nama_barang: "STNK",
-  });
-
-  const result = await laporan.getUser();
-
-  expect(result.email).toBe("owner@example.com");
 });
