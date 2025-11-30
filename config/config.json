@@ -2,7 +2,7 @@
   "development": {
     "username": "root",
     "password": null,
-    "database": "silapornew",
+    "database": "silapor_ppsi",
     "host": "127.0.0.1",
     "dialect": "mysql"
   },
