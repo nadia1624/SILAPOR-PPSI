@@ -3,6 +3,8 @@ const chrome = require('selenium-webdriver/chrome');
 const { ServiceBuilder } = require('selenium-webdriver/chrome');
 const chromedriver = require('chromedriver');
 const path = require('path');
+const fs = require('fs'); 
+
 
 // --- Konfigurasi ---
 const BASE_URL = process.env.BASE_URL || 'http://localhost:3000';
@@ -16,6 +18,14 @@ const ADMIN_CREDENTIALS = {
     email: 'admin@silapor.com',
     password: 'admin123'
 };
+
+const TEST_REPORT = {
+    nama_barang: 'Uang',
+    lokasi: 'Ruang Server Admin',
+    deskripsi: 'Uang hilang saat proses maintenance server rutin.',
+    tanggal_kejadian: '01-12-2025'
+};
+
 
 // --- Fungsi Utility ---
 const loginAsAdmin = async (driver) => {
@@ -394,5 +404,243 @@ describe('SYSTEM TESTING: Admin Report Management - End to End Scenarios', () =>
             }
         }, 40000);
     });
+
+    // ========================================
+    // SKENARIO 3: BUAT LAPORAN BARU (ADMIN)
+    // ========================================
+      describe('SKENARIO 3: Admin Membuat Laporan Baru', () => {
+        test('ST-ADMIN-CREATE-001: Admin sukses membuat laporan dan status On Progress', async () => {
+            // PERBAIKAN: Ubah Navigasi ke '/admin/dashboard' sesuai screenshot
+            console.log('   - [Step 1] Mengakses Dashboard Admin...');
+            await driver.get(`${BASE_URL}/admin/dashboard`);
+            await driver.wait(until.urlContains('/admin'), 10000);
+            
+            console.log('   - [Step 2] Menekan tombol Buat Laporan...');
+            try {
+                // Mencari tombol "Buat Laporan Baru" (Tombol Putih di Banner Hijau)
+                // XPath ini mencari link (<a>) atau button (<button>) yang berisi teks 'Buat Laporan Baru'
+                const createBtn = await driver.wait(
+                    until.elementLocated(By.xpath("//*[self::a or self::button][contains(., 'Buat Laporan Baru')]")), 
+                    5000
+                );
+                await driver.executeScript("arguments[0].click();", createBtn);
+            } catch (e) {
+                console.log('     Tombol tidak ditemukan di Dashboard, mencoba akses URL langsung...');
+                await driver.get(`${BASE_URL}/admin/report/create`);
+            }
+
+            await driver.wait(until.elementLocated(By.name('nama_barang')), TIMEOUT);
+
+            console.log('   - Mengisi data laporan...');
+            const jenisSelect = await driver.findElement(By.name('jenis_laporan'));
+            await jenisSelect.sendKeys('Kehilangan');
+            await driver.findElement(By.name('nama_barang')).sendKeys(TEST_REPORT.nama_barang);
+            await driver.findElement(By.name('lokasi_kejadian')).sendKeys(TEST_REPORT.lokasi);
+            await driver.findElement(By.name('tanggal_kejadian')).sendKeys(TEST_REPORT.tanggal_kejadian);
+            await driver.findElement(By.name('deskripsi')).sendKeys(TEST_REPORT.deskripsi);
+
+            console.log('   - Upload bukti foto...');
+     
+            const filePath = path.resolve(__dirname, 'admin_bukti.jpg');
+            if (!fs.existsSync(filePath)) {
+                fs.writeFileSync(filePath, 'dummy content for testing upload'); 
+            }
+            const fileInput = await driver.findElement(By.css('input[type="file"]'));
+            await fileInput.sendKeys(filePath);
+
+            console.log('   - Mengirim laporan...');
+            const submitBtn = await driver.findElement(By.css('button[type="submit"]'));
+            await driver.executeScript("arguments[0].scrollIntoView(true);", submitBtn);
+            await driver.sleep(500);
+            await submitBtn.click();
+
+            console.log('   - Verifikasi hasil...');
+            await driver.wait(until.urlContains('/admin/my-reports'), TIMEOUT);
+            const pageSource = await driver.getPageSource();
+            expect(pageSource.includes(TEST_REPORT.nama_barang)).toBe(true);
+            const isStatusCorrect = pageSource.includes('On progress');
+            
+            if(!isStatusCorrect) {
+                console.log('WARNING: Status "On progress" tidak ditemukan pada halaman Laporan Saya.');
+            }
+            expect(isStatusCorrect).toBe(true);
+            console.log('✓ PASS: Admin sukses membuat laporan & status On progress valid');
+        }, 40000);
+    }); 
+
+     // ========================================
+    // SKENARIO 4: MELIHAT DETAIL (ADMIN)
+    // ========================================
+    describe('SKENARIO 4: Admin Melihat Detail Laporan Sendiri', () => {
+        test('ST-ADMIN-DETAIL-001: Admin dapat melihat detail laporan melalui modal', async () => {
+            console.log('   - [Step 1] Navigasi ke Laporan Saya (Admin)...');
+            await driver.get(`${BASE_URL}/admin/my-reports`);
+            await driver.wait(until.urlContains('/admin/my-reports'), 10000);
+            await driver.sleep(2000);
+            console.log('   - [Step 2] Klik tombol Detail pada laporan test...');
+            // 1. Cari judul laporan
+            const reportTitle = await driver.wait(
+                until.elementLocated(By.xpath(`//*[contains(text(), '${TEST_REPORT.nama_barang}')]`)), 
+                15000
+            );
+            await driver.executeScript("arguments[0].scrollIntoView({block: 'center'});", reportTitle);
+            
+            // 2. Cari tombol Detail yang berelasi dengan judul tersebut
+            const btnDetail = await driver.findElement(
+                By.xpath(`//*[contains(text(), '${TEST_REPORT.nama_barang}')]/following::*[self::a or self::button][contains(., 'Detail')][1]`)
+            );
+            
+            // 3. Mekanisme Retry Klik
+            let modalOpened = false;
+            let attempts = 0;
+            while (!modalOpened && attempts < 3) {
+                console.log(`     Percobaan klik ke-${attempts + 1}...`);
+                await driver.executeScript("arguments[0].click();", btnDetail);
+                await driver.sleep(2000);
+                
+                const bodyText = await driver.findElement(By.tagName('body')).getText();
+                if (bodyText.includes('Detail Laporan')) {
+                    modalOpened = true;
+                } else {
+                    attempts++;
+                }
+            }
+            if (!modalOpened) throw new Error("Gagal membuka modal detail admin setelah 3x percobaan.");
+
+            console.log('   - [Step 3] Validasi konten modal...');
+            const bodyTextCheck = await driver.findElement(By.tagName('body')).getText();
+            expect(bodyTextCheck).toContain('Detail Laporan');
+            expect(bodyTextCheck).toContain(TEST_REPORT.nama_barang);
+            expect(bodyTextCheck).toContain(TEST_REPORT.lokasi);
+            expect(bodyTextCheck).toContain(TEST_REPORT.deskripsi);
+            
+            const statusLower = bodyTextCheck.toLowerCase();
+            if (statusLower.includes('On progress')) {
+                console.log('     Status "On progress" terdeteksi.');
+            } else {
+                console.log('     Warning: Status spesifik tidak terdeteksi di modal.');
+            }
+
+            console.log('   - [Step 4] Menutup modal...');
+            const closeButtons = await driver.findElements(By.xpath(".//button[contains(., 'Tutup')] | .//button[contains(., 'Close')] | .//*[contains(@class, 'close')]"));
+            
+            let closeClicked = false;
+            for (const btn of closeButtons) {
+                if (await btn.isDisplayed()) {
+                    await driver.executeScript("arguments[0].click();", btn);
+                    closeClicked = true;
+                    break;
+                }
+            }
+            if (!closeClicked && closeButtons.length > 0) {
+                 await driver.executeScript("arguments[0].click();", closeButtons[0]);
+            }
+            
+            await driver.sleep(1000);
+            console.log('✓ PASS: Modal detail admin tervalidasi.');
+        }, 40000);
+    });
+
+    // ========================================
+    // SKENARIO 5: EDIT LAPORAN (ADMIN)
+    // ========================================
+    describe('SKENARIO 5: Admin Mengedit Laporan Sendiri', () => {
+        test('ST-ADMIN-EDIT-001: Admin dapat mengedit laporan (termasuk foto) dan menyimpan', async () => {
+            const UPDATED_REPORT_ADMIN = {
+                nama_barang: 'Botol Minum',
+                lokasi: 'Gedung G',
+                deskripsi: 'Ditemukan botol di G.',
+            };
+
+            console.log('   - [Step 1] Navigasi ke Laporan Saya...');
+            await driver.get(`${BASE_URL}/admin/my-reports`);
+            await driver.wait(until.urlContains('/admin/my-reports'), 10000);
+            await driver.sleep(2000);
+
+            console.log('   - [Step 2] Mencari laporan untuk diedit...');
+            const reportTitle = await driver.wait(
+                until.elementLocated(By.xpath(`//*[contains(text(), '${TEST_REPORT.nama_barang}')]`)), 
+                15000
+            );
+            await driver.executeScript("arguments[0].scrollIntoView({block: 'center'});", reportTitle);
+
+            console.log('   - [Step 3] Menekan tombol Edit...');
+            const btnEdit = await driver.findElement(
+                By.xpath(`//*[contains(text(), '${TEST_REPORT.nama_barang}')]/following::*[self::a or self::button][contains(., 'Edit')][1]`)
+            );
+            await driver.executeScript("arguments[0].click();", btnEdit);
+            await driver.sleep(2000); 
+
+            const bodyText = await driver.findElement(By.tagName('body')).getText();
+            expect(bodyText).toContain('Edit Laporan');
+
+            console.log('   - [Step 4] Mengubah data laporan...');
+            
+            const findVisibleInput = async (name) => {
+                const elements = await driver.findElements(By.name(name));
+                for (const el of elements) {
+                    if (await el.isDisplayed()) return el;
+                }
+                return null;
+            };
+
+            // 1. Edit Nama
+            const inputNama = await findVisibleInput('nama_barang');
+            if (!inputNama) throw new Error("Input nama_barang tidak ditemukan visible");
+            await inputNama.clear();
+            await inputNama.sendKeys(UPDATED_REPORT_ADMIN.nama_barang);
+
+            // 2. Edit Lokasi
+            let inputLokasi = await findVisibleInput('lokasi');
+            if (!inputLokasi) inputLokasi = await findVisibleInput('lokasi_kejadian');
+            await inputLokasi.clear();
+            await inputLokasi.sendKeys(UPDATED_REPORT_ADMIN.lokasi);
+
+            // 3. Edit Deskripsi
+            const inputDeskripsi = await findVisibleInput('deskripsi');
+            await inputDeskripsi.clear();
+            await inputDeskripsi.sendKeys(UPDATED_REPORT_ADMIN.deskripsi);
+
+            // 4. Ganti Foto (Scoping ke Modal agar tidak salah upload)
+            console.log('     Mengganti foto admin...');
+            
+       
+            const modalTitleElement = await driver.findElement(By.xpath("//*[contains(text(), 'Edit Laporan')]"));
+            const editModal = await modalTitleElement.findElement(By.xpath("./ancestor::div[contains(@class, 'bg-white') or @role='dialog'][1]"));
+            const fileInput = await editModal.findElement(By.css('input[type="file"]'));
+            
+            const filePathBaru = path.resolve(__dirname, 'admin_bukti_edit.jpg'); 
+            if (!fs.existsSync(filePathBaru)) {
+                fs.writeFileSync(filePathBaru, 'dummy content for admin edit upload'); 
+            }
+            await fileInput.sendKeys(filePathBaru);
+
+            console.log('   - [Step 5] Menyimpan Perubahan...');
+            const buttons = await driver.findElements(By.xpath("//button[contains(., 'Simpan Perubahan')]"));
+            let btnSimpan;
+            for (const btn of buttons) {
+                if (await btn.isDisplayed()) {
+                    btnSimpan = btn;
+                    break;
+                }
+            }
+            if (btnSimpan) {
+                await driver.executeScript("arguments[0].click();", btnSimpan);
+            } else {
+                throw new Error("Tombol Simpan tidak ditemukan.");
+            }
+            await driver.sleep(3000);
+            await driver.wait(until.urlContains('/admin/my-reports'), 10000);
+
+            console.log('   - [Step 6] Validasi data terupdate...');
+            const pageSource = await driver.getPageSource();
+            expect(pageSource).toContain(UPDATED_REPORT_ADMIN.nama_barang);
+            expect(pageSource).toContain(UPDATED_REPORT_ADMIN.lokasi);
+            expect(pageSource).toContain(UPDATED_REPORT_ADMIN.deskripsi);
+            console.log('✓ PASS: Admin berhasil mengedit laporan.');
+
+        }, 45000);
+    });
+
 
 });
