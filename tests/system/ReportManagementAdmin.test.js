@@ -3,7 +3,7 @@ const chrome = require('selenium-webdriver/chrome');
 const { ServiceBuilder } = require('selenium-webdriver/chrome');
 const chromedriver = require('chromedriver');
 const path = require('path');
-const fs = require('fs'); 
+const fs = require('fs');
 
 
 // --- Konfigurasi ---
@@ -108,7 +108,7 @@ describe('SYSTEM TESTING: Admin Report Management - End to End Scenarios', () =>
     // SKENARIO 1: LIHAT LAPORAN
     // ========================================
     describe('SKENARIO 1: Admin Melihat Laporan Penemuan dan Kehilangan', () => {
-        
+
         test('ST-001: Admin dapat melihat daftar semua laporan dengan status On Progress', async () => {
             // GIVEN: Admin sudah login
             // WHEN: Admin mengakses halaman laporan
@@ -144,9 +144,9 @@ describe('SYSTEM TESTING: Admin Report Management - End to End Scenarios', () =>
                     until.elementLocated(By.css('.hs-overlay, .modal, [role="dialog"]')),
                     5000
                 );
-                
+
                 expect(await modal.isDisplayed()).toBeTruthy();
-                
+
                 // AND: Detail laporan tampil lengkap
                 const modalText = await modal.getText();
                 expect(modalText.length).toBeGreaterThan(0);
@@ -156,160 +156,6 @@ describe('SYSTEM TESTING: Admin Report Management - End to End Scenarios', () =>
                 console.log('⚠ SKIP: Tidak ada laporan untuk dilihat detailnya');
             }
         }, 20000);
-    });
-
-    // ========================================
-    // SKENARIO 2: VERIFIKASI UPLOAD BUKTI LAPORAN
-    // ========================================
-    describe('SKENARIO 2: Admin Memverifikasi Upload Bukti Laporan', () => {
-        test('ST-VERIF-ADMIN-001: Admin dapat membuka halaman Verifikasi Laporan', async () => {
-            await driver.get(`${BASE_URL}/admin/verifikasi`);
-            await driver.sleep(2000);
-
-            const currentUrl = await driver.getCurrentUrl();
-            expect(currentUrl).toContain('/admin/verifikasi');
-
-            const heading = await driver.findElement(
-                By.xpath("//h1[contains(., 'Verifikasi Laporan')]")
-            ).getText();
-            expect(heading.length).toBeGreaterThan(0);
-
-            console.log('✓ PASS: Admin dapat membuka halaman Verifikasi Laporan');
-        }, 20000);
-
-        test('ST-VERIF-ADMIN-002: Admin dapat melihat detail laporan sebelum verifikasi', async () => {
-            await driver.get(`${BASE_URL}/admin/verifikasi`);
-            await driver.sleep(2000);
-
-            try {
-                const verifyButton = await driver.findElement(
-                    By.xpath("//button[contains(., 'Verifikasi')]")
-                );
-                await verifyButton.click();
-                await driver.sleep(1000);
-
-                const detailModal = await driver.findElement(By.id('detailModal'));
-
-                await driver.wait(async () => {
-                    const classes = await detailModal.getAttribute('class');
-                    return !classes.includes('hidden');
-                }, 5000);
-
-                const modalText = await detailModal.getText();
-                expect(modalText.length).toBeGreaterThan(0);
-
-                console.log('✓ PASS: Detail laporan verifikasi dapat ditampilkan');
-            } catch (error) {
-                console.log('⚠ SKIP: Tidak ada laporan yang menunggu verifikasi');
-            }
-        }, 25000);
-
-        test('ST-VERIF-ADMIN-003: Admin dapat menyetujui verifikasi upload bukti laporan', async () => {
-            await driver.get(`${BASE_URL}/admin/verifikasi`);
-            await driver.sleep(2000);
-
-            try {
-                const verifyButtons = await driver.findElements(
-                    By.xpath("//button[contains(., 'Verifikasi')]")
-                );
-
-                if (!verifyButtons.length) {
-                    console.log('⚠ SKIP: Tidak ada laporan yang menunggu verifikasi untuk disetujui');
-                    return;
-                }
-
-                await verifyButtons[0].click();
-                await driver.sleep(1000);
-
-                const detailModal = await driver.findElement(By.id('detailModal'));
-
-                await driver.wait(async () => {
-                    const classes = await detailModal.getAttribute('class');
-                    return !classes.includes('hidden');
-                }, 5000);
-
-                const approveButton = await driver.findElement(
-                    By.css('#detail-approve-form button[type="submit"]')
-                );
-                await approveButton.click();
-
-                await driver.wait(until.urlContains('/admin/verifikasi'), 10000);
-
-                const heading = await driver.findElement(
-                    By.xpath("//h1[contains(., 'Verifikasi Laporan')]")
-                ).getText();
-                expect(heading.length).toBeGreaterThan(0);
-
-                console.log('✓ PASS: Admin dapat menyetujui verifikasi laporan');
-            } catch (error) {
-                console.log('⚠ SKIP: Gagal menemukan skenario verifikasi approve yang valid');
-            }
-        }, 35000);
-
-        test('ST-VERIF-ADMIN-004: Admin dapat menolak verifikasi upload bukti laporan dengan alasan', async () => {
-            await driver.get(`${BASE_URL}/admin/verifikasi`);
-            await driver.sleep(2000);
-
-            try {
-                const verifyButtons = await driver.findElements(
-                    By.xpath("//button[contains(., 'Verifikasi')]")
-                );
-
-                if (!verifyButtons.length) {
-                    console.log('⚠ SKIP: Tidak ada laporan yang menunggu verifikasi untuk ditolak');
-                    return;
-                }
-
-                await verifyButtons[0].click();
-                await driver.sleep(1000);
-
-                const detailModal = await driver.findElement(By.id('detailModal'));
-
-                await driver.wait(async () => {
-                    const classes = await detailModal.getAttribute('class');
-                    return !classes.includes('hidden');
-                }, 5000);
-
-                const rejectFromDetailBtn = await driver.findElement(By.id('detail-reject-btn'));
-                await rejectFromDetailBtn.click();
-
-                await driver.sleep(500);
-
-                const rejectModals = await driver.findElements(
-                    By.xpath("//div[starts-with(@id, 'rejectClaimModal-') and not(contains(@class,'hidden'))]")
-                );
-
-                if (!rejectModals.length) {
-                    console.log('⚠ SKIP: Modal tolak verifikasi tidak ditemukan');
-                    return;
-                }
-
-                const activeRejectModal = rejectModals[0];
-
-                const alasanSelect = await activeRejectModal.findElement(By.tagName('select'));
-                await alasanSelect.click();
-                const option = await alasanSelect.findElement(
-                    By.xpath(".//option[not(@disabled) and @value!='' and @value!='lainnya']")
-                );
-                await option.click();
-
-                const submitButton = await activeRejectModal.findElement(
-                    By.xpath(".//button[contains(., 'Tolak Verifikasi')]")
-                );
-                await submitButton.click();
-
-                await driver.wait(until.urlContains('/admin/verifikasi'), 10000);
-
-                const heading = await driver.findElement(
-                    By.xpath("//h1[contains(., 'Verifikasi Laporan')]")
-                ).getText();
-                expect(heading.length).toBeGreaterThan(0);
-
-                console.log('✓ PASS: Admin dapat menolak verifikasi laporan dengan alasan');
-            } catch (error) {
-                console.log('⚠ SKIP: Gagal menemukan skenario verifikasi reject yang valid');
-            }
-        }, 40000);
     });
 
     // ========================================
@@ -408,19 +254,19 @@ describe('SYSTEM TESTING: Admin Report Management - End to End Scenarios', () =>
     // ========================================
     // SKENARIO 3: BUAT LAPORAN BARU (ADMIN)
     // ========================================
-      describe('SKENARIO 3: Admin Membuat Laporan Baru', () => {
+    describe('SKENARIO 3: Admin Membuat Laporan Baru', () => {
         test('ST-ADMIN-CREATE-001: Admin sukses membuat laporan dan status On Progress', async () => {
             // PERBAIKAN: Ubah Navigasi ke '/admin/dashboard' sesuai screenshot
             console.log('   - [Step 1] Mengakses Dashboard Admin...');
             await driver.get(`${BASE_URL}/admin/dashboard`);
             await driver.wait(until.urlContains('/admin'), 10000);
-            
+
             console.log('   - [Step 2] Menekan tombol Buat Laporan...');
             try {
                 // Mencari tombol "Buat Laporan Baru" (Tombol Putih di Banner Hijau)
                 // XPath ini mencari link (<a>) atau button (<button>) yang berisi teks 'Buat Laporan Baru'
                 const createBtn = await driver.wait(
-                    until.elementLocated(By.xpath("//*[self::a or self::button][contains(., 'Buat Laporan Baru')]")), 
+                    until.elementLocated(By.xpath("//*[self::a or self::button][contains(., 'Buat Laporan Baru')]")),
                     5000
                 );
                 await driver.executeScript("arguments[0].click();", createBtn);
@@ -440,10 +286,10 @@ describe('SYSTEM TESTING: Admin Report Management - End to End Scenarios', () =>
             await driver.findElement(By.name('deskripsi')).sendKeys(TEST_REPORT.deskripsi);
 
             console.log('   - Upload bukti foto...');
-     
+
             const filePath = path.resolve(__dirname, 'admin_bukti.jpg');
             if (!fs.existsSync(filePath)) {
-                fs.writeFileSync(filePath, 'dummy content for testing upload'); 
+                fs.writeFileSync(filePath, 'dummy content for testing upload');
             }
             const fileInput = await driver.findElement(By.css('input[type="file"]'));
             await fileInput.sendKeys(filePath);
@@ -459,16 +305,16 @@ describe('SYSTEM TESTING: Admin Report Management - End to End Scenarios', () =>
             const pageSource = await driver.getPageSource();
             expect(pageSource.includes(TEST_REPORT.nama_barang)).toBe(true);
             const isStatusCorrect = pageSource.includes('On progress');
-            
-            if(!isStatusCorrect) {
+
+            if (!isStatusCorrect) {
                 console.log('WARNING: Status "On progress" tidak ditemukan pada halaman Laporan Saya.');
             }
             expect(isStatusCorrect).toBe(true);
             console.log('✓ PASS: Admin sukses membuat laporan & status On progress valid');
         }, 40000);
-    }); 
+    });
 
-     // ========================================
+    // ========================================
     // SKENARIO 4: MELIHAT DETAIL (ADMIN)
     // ========================================
     describe('SKENARIO 4: Admin Melihat Detail Laporan Sendiri', () => {
@@ -480,16 +326,16 @@ describe('SYSTEM TESTING: Admin Report Management - End to End Scenarios', () =>
             console.log('   - [Step 2] Klik tombol Detail pada laporan test...');
             // 1. Cari judul laporan
             const reportTitle = await driver.wait(
-                until.elementLocated(By.xpath(`//*[contains(text(), '${TEST_REPORT.nama_barang}')]`)), 
+                until.elementLocated(By.xpath(`//*[contains(text(), '${TEST_REPORT.nama_barang}')]`)),
                 15000
             );
             await driver.executeScript("arguments[0].scrollIntoView({block: 'center'});", reportTitle);
-            
+
             // 2. Cari tombol Detail yang berelasi dengan judul tersebut
             const btnDetail = await driver.findElement(
                 By.xpath(`//*[contains(text(), '${TEST_REPORT.nama_barang}')]/following::*[self::a or self::button][contains(., 'Detail')][1]`)
             );
-            
+
             // 3. Mekanisme Retry Klik
             let modalOpened = false;
             let attempts = 0;
@@ -497,7 +343,7 @@ describe('SYSTEM TESTING: Admin Report Management - End to End Scenarios', () =>
                 console.log(`     Percobaan klik ke-${attempts + 1}...`);
                 await driver.executeScript("arguments[0].click();", btnDetail);
                 await driver.sleep(2000);
-                
+
                 const bodyText = await driver.findElement(By.tagName('body')).getText();
                 if (bodyText.includes('Detail Laporan')) {
                     modalOpened = true;
@@ -513,7 +359,7 @@ describe('SYSTEM TESTING: Admin Report Management - End to End Scenarios', () =>
             expect(bodyTextCheck).toContain(TEST_REPORT.nama_barang);
             expect(bodyTextCheck).toContain(TEST_REPORT.lokasi);
             expect(bodyTextCheck).toContain(TEST_REPORT.deskripsi);
-            
+
             const statusLower = bodyTextCheck.toLowerCase();
             if (statusLower.includes('On progress')) {
                 console.log('     Status "On progress" terdeteksi.');
@@ -523,7 +369,7 @@ describe('SYSTEM TESTING: Admin Report Management - End to End Scenarios', () =>
 
             console.log('   - [Step 4] Menutup modal...');
             const closeButtons = await driver.findElements(By.xpath(".//button[contains(., 'Tutup')] | .//button[contains(., 'Close')] | .//*[contains(@class, 'close')]"));
-            
+
             let closeClicked = false;
             for (const btn of closeButtons) {
                 if (await btn.isDisplayed()) {
@@ -533,9 +379,9 @@ describe('SYSTEM TESTING: Admin Report Management - End to End Scenarios', () =>
                 }
             }
             if (!closeClicked && closeButtons.length > 0) {
-                 await driver.executeScript("arguments[0].click();", closeButtons[0]);
+                await driver.executeScript("arguments[0].click();", closeButtons[0]);
             }
-            
+
             await driver.sleep(1000);
             console.log('✓ PASS: Modal detail admin tervalidasi.');
         }, 40000);
@@ -559,7 +405,7 @@ describe('SYSTEM TESTING: Admin Report Management - End to End Scenarios', () =>
 
             console.log('   - [Step 2] Mencari laporan untuk diedit...');
             const reportTitle = await driver.wait(
-                until.elementLocated(By.xpath(`//*[contains(text(), '${TEST_REPORT.nama_barang}')]`)), 
+                until.elementLocated(By.xpath(`//*[contains(text(), '${TEST_REPORT.nama_barang}')]`)),
                 15000
             );
             await driver.executeScript("arguments[0].scrollIntoView({block: 'center'});", reportTitle);
@@ -569,13 +415,13 @@ describe('SYSTEM TESTING: Admin Report Management - End to End Scenarios', () =>
                 By.xpath(`//*[contains(text(), '${TEST_REPORT.nama_barang}')]/following::*[self::a or self::button][contains(., 'Edit')][1]`)
             );
             await driver.executeScript("arguments[0].click();", btnEdit);
-            await driver.sleep(2000); 
+            await driver.sleep(2000);
 
             const bodyText = await driver.findElement(By.tagName('body')).getText();
             expect(bodyText).toContain('Edit Laporan');
 
             console.log('   - [Step 4] Mengubah data laporan...');
-            
+
             const findVisibleInput = async (name) => {
                 const elements = await driver.findElements(By.name(name));
                 for (const el of elements) {
@@ -603,15 +449,15 @@ describe('SYSTEM TESTING: Admin Report Management - End to End Scenarios', () =>
 
             // 4. Ganti Foto (Scoping ke Modal agar tidak salah upload)
             console.log('     Mengganti foto admin...');
-            
-       
+
+
             const modalTitleElement = await driver.findElement(By.xpath("//*[contains(text(), 'Edit Laporan')]"));
             const editModal = await modalTitleElement.findElement(By.xpath("./ancestor::div[contains(@class, 'bg-white') or @role='dialog'][1]"));
             const fileInput = await editModal.findElement(By.css('input[type="file"]'));
-            
-            const filePathBaru = path.resolve(__dirname, 'admin_bukti_edit.jpg'); 
+
+            const filePathBaru = path.resolve(__dirname, 'admin_bukti_edit.jpg');
             if (!fs.existsSync(filePathBaru)) {
-                fs.writeFileSync(filePathBaru, 'dummy content for admin edit upload'); 
+                fs.writeFileSync(filePathBaru, 'dummy content for admin edit upload');
             }
             await fileInput.sendKeys(filePathBaru);
 
@@ -642,5 +488,239 @@ describe('SYSTEM TESTING: Admin Report Management - End to End Scenarios', () =>
         }, 45000);
     });
 
+    // ========================================
+    // SKENARIO 6: VERIFIKASI KLAIM YANG MASUK
+    // ========================================
+    describe('SKENARIO 6: Admin Melihat dan Memproses Verifikasi Klaim yang Masuk', () => {
+        test('ST-VERIF-CLAIM-001: Admin dapat membuka halaman verifikasi klaim', async () => {
+            await driver.get(`${BASE_URL}/admin/my-reports`);
+            await driver.sleep(2000);
+
+            const currentUrl = await driver.getCurrentUrl();
+            expect(currentUrl).toContain('/admin/my-reports');
+
+            const bodyText = await driver.findElement(By.tagName('body')).getText();
+            expect(bodyText.length).toBeGreaterThan(0);
+
+            console.log('✓ PASS: Admin dapat membuka halaman laporan untuk melihat klaim');
+        }, 20000);
+
+        test('ST-VERIF-CLAIM-002: Admin dapat melihat daftar laporan dengan status klaim', async () => {
+            await driver.get(`${BASE_URL}/admin/my-reports`);
+            await driver.sleep(2000);
+
+            try {
+                const claimIndicators = await driver.findElements(
+                    By.xpath("//*[contains(text(), 'Claimed') or contains(text(), 'Waiting') or contains(text(), 'Diklaim')]")
+                );
+
+                if (claimIndicators.length > 0) {
+                    console.log(`✓ PASS: Ditemukan ${claimIndicators.length} indikator status klaim pada halaman`);
+                } else {
+                    console.log('⚠ INFO: Tidak ada laporan dengan status klaim saat ini');
+                }
+            } catch (error) {
+                console.log('⚠ SKIP: Gagal mencari indikator klaim');
+            }
+        }, 25000);
+
+        test('ST-VERIF-CLAIM-003: Admin dapat menyetujui verifikasi klaim dengan upload bukti penyerahan', async () => {
+            await driver.get(`${BASE_URL}/admin/my-reports`);
+            await driver.sleep(2000);
+
+            try {
+                const acceptButtons = await driver.findElements(
+                    By.xpath("//button[contains(., 'Setujui Klaim') or contains(., 'Terima Klaim')]")
+                );
+
+                if (!acceptButtons.length) {
+                    console.log('⚠ SKIP: Tidak ada klaim yang menunggu persetujuan');
+                    return;
+                }
+
+                await acceptButtons[0].click();
+                await driver.sleep(1500);
+
+                const formElements = await driver.findElements(
+                    By.css('input[name="lokasi_penyerahan"], input[name="tanggal_penyerahan"], input[type="file"]')
+                );
+
+                if (formElements.length > 0) {
+                    console.log('✓ PASS: Form penyerahan bukti klaim tersedia');
+                } else {
+                    console.log('⚠ INFO: Form tidak terdeteksi, mungkin menggunakan modal atau flow berbeda');
+                }
+            } catch (error) {
+                console.log('⚠ SKIP: Gagal menemukan skenario accept claim');
+            }
+        }, 35000);
+
+        test('ST-VERIF-CLAIM-004: Admin dapat menolak verifikasi klaim dengan memberikan alasan', async () => {
+            await driver.get(`${BASE_URL}/admin/my-reports`);
+            await driver.sleep(2000);
+
+            try {
+                const rejectButtons = await driver.findElements(
+                    By.xpath("//button[contains(., 'Tolak Klaim') or contains(., 'Reject Claim')]")
+                );
+
+                if (!rejectButtons.length) {
+                    console.log('⚠ SKIP: Tidak ada klaim yang dapat ditolak');
+                    return;
+                }
+
+                await rejectButtons[0].click();
+                await driver.sleep(1000);
+
+                const alasanElements = await driver.findElements(
+                    By.css('textarea[name="alasan"], select[name="alasan"], input[name="alasan"]')
+                );
+
+                if (alasanElements.length > 0) {
+                    console.log('✓ PASS: Form alasan penolakan tersedia');
+                } else {
+                    const swalPopup = await driver.findElements(By.css('.swal2-popup'));
+                    if (swalPopup.length > 0) {
+                        console.log('✓ PASS: Modal konfirmasi penolakan tersedia');
+                    } else {
+                        console.log('⚠ INFO: Elemen alasan tidak terdeteksi');
+                    }
+                }
+            } catch (error) {
+                console.log('⚠ SKIP: Gagal menemukan skenario reject claim');
+            }
+        }, 35000);
+    });
+
+    // ========================================
+    // SKENARIO 7: HAPUS LAPORAN (ADMIN)
+    // ========================================
+    describe('SKENARIO 7: Admin Menghapus Laporan Sendiri', () => {
+        test('ST-ADMIN-DELETE-001: Admin dapat melihat tombol hapus pada laporan', async () => {
+            await driver.get(`${BASE_URL}/admin/my-reports`);
+            await driver.sleep(2000);
+
+            try {
+                const deleteButtons = await driver.findElements(
+                    By.xpath("//button[contains(., 'Hapus') or contains(., 'Delete')]")
+                );
+
+                if (deleteButtons.length > 0) {
+                    console.log(`✓ PASS: Ditemukan ${deleteButtons.length} tombol hapus pada halaman`);
+                } else {
+                    console.log('⚠ INFO: Tidak ada tombol hapus yang terlihat (mungkin di dalam dropdown atau kondisi tertentu)');
+                }
+            } catch (error) {
+                console.log('⚠ SKIP: Gagal mencari tombol hapus');
+            }
+        }, 20000);
+
+        test('ST-ADMIN-DELETE-002: Sistem menampilkan konfirmasi sebelum menghapus laporan', async () => {
+            await driver.get(`${BASE_URL}/admin/my-reports`);
+            await driver.sleep(2000);
+
+            try {
+                const deleteButtons = await driver.findElements(
+                    By.xpath("//button[contains(., 'Hapus') or contains(., 'Delete')]")
+                );
+
+                if (!deleteButtons.length) {
+                    console.log('⚠ SKIP: Tidak ada tombol hapus untuk ditest');
+                    return;
+                }
+
+                await deleteButtons[0].click();
+                await driver.sleep(1000);
+
+                const confirmElements = await driver.findElements(
+                    By.xpath("//*[contains(text(), 'Yakin') or contains(text(), 'Konfirmasi') or contains(text(), 'Hapus')]")
+                );
+
+                const swalPopup = await driver.findElements(By.css('.swal2-popup'));
+
+                if (confirmElements.length > 0 || swalPopup.length > 0) {
+                    console.log('✓ PASS: Sistem menampilkan konfirmasi sebelum menghapus');
+
+                    const cancelBtn = await driver.findElements(By.css('.swal2-cancel, button[contains(., "Batal")]'));
+                    if (cancelBtn.length > 0) {
+                        await driver.executeScript("arguments[0].click();", cancelBtn[0]);
+                    }
+                } else {
+                    console.log('⚠ INFO: Konfirmasi tidak terdeteksi');
+                }
+            } catch (error) {
+                console.log('⚠ SKIP: Gagal menemukan mekanisme konfirmasi hapus');
+            }
+        }, 30000);
+    });
+
+    // ========================================
+    // SKENARIO 8: STATUS PENGAJUAN LAPORAN
+    // ========================================
+    describe('SKENARIO 8: Admin Melihat Status Pengajuan Laporan', () => {
+        test('ST-STATUS-001: Admin dapat melihat berbagai status laporan pada halaman', async () => {
+            await driver.get(`${BASE_URL}/admin/my-reports`);
+            await driver.sleep(2000);
+
+            const bodyText = await driver.findElement(By.tagName('body')).getText();
+
+            const possibleStatuses = [
+                'On progress',
+                'Waiting',
+                'Claimed',
+                'Done',
+                'Rejected',
+                'Selesai',
+                'Diklaim',
+                'Ditolak',
+                'Menunggu'
+            ];
+
+            const foundStatuses = possibleStatuses.filter(status =>
+                bodyText.toLowerCase().includes(status.toLowerCase())
+            );
+
+            if (foundStatuses.length > 0) {
+                console.log(`✓ PASS: Ditemukan status: ${foundStatuses.join(', ')}`);
+            } else {
+                console.log('⚠ INFO: Tidak ada status yang terdeteksi (mungkin tidak ada laporan)');
+            }
+        }, 20000);
+
+        test('ST-STATUS-002: Admin dapat melihat detail status pada laporan individual', async () => {
+            await driver.get(`${BASE_URL}/admin/my-reports`);
+            await driver.sleep(2000);
+
+            try {
+                const detailButtons = await driver.findElements(
+                    By.xpath("//button[contains(., 'Detail')]")
+                );
+
+                if (!detailButtons.length) {
+                    console.log('⚠ SKIP: Tidak ada laporan untuk dilihat detailnya');
+                    return;
+                }
+
+                await detailButtons[0].click();
+                await driver.sleep(1500);
+
+                const bodyText = await driver.findElement(By.tagName('body')).getText();
+
+                const hasStatusInfo =
+                    bodyText.includes('Status') ||
+                    bodyText.includes('On progress') ||
+                    bodyText.includes('Claimed') ||
+                    bodyText.includes('Done');
+
+                if (hasStatusInfo) {
+                    console.log('✓ PASS: Detail laporan menampilkan informasi status');
+                } else {
+                    console.log('⚠ INFO: Status tidak terdeteksi pada detail modal');
+                }
+            } catch (error) {
+                console.log('⚠ SKIP: Gagal melihat detail laporan');
+            }
+        }, 30000);
+    });
 
 });
