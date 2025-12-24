@@ -298,9 +298,9 @@ describe('SYSTEM TESTING: Mahasiswa My Reports (CRUD) - End to End Scenarios', (
             expect(bodyText.length).toBeGreaterThan(0);
             console.log('✓ PASS: Halaman status laporan dapat diakses');
         }, 20000);
-    });
+    }); 
 
-    // ========================================
+    // ========================================2
     // SKENARIO 3: MELIHAT DETAIL LAPORAN (READ DETAIL)
     // ========================================
     describe('SKENARIO 3: Mahasiswa Melihat Detail Laporan (Read Detail)', () => {
