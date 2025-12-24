@@ -7,7 +7,7 @@ REM =====================================================
 setlocal enabledelayedexpansion
 
 REM Set JMeter path - Path JMeter Anda
-set JMETER_HOME=C:\Users\andre\Downloads\apache-jmeter-5.6.3\apache-jmeter-5.6.3
+set JMETER_HOME=C:\Program Files\apache-jmeter-5.6.3
 
 REM Set test files directory
 set TEST_DIR=%~dp0
@@ -41,42 +41,24 @@ if not exist "%JMETER_HOME%\bin\jmeter.bat" (
 
 echo Pilih test yang ingin dijalankan:
 echo.
-echo   1. Comprehensive Test (20 users - Smoke Test + Auth Flow)
-echo   2. Load Test 500 Users (sesuai NFR)
-echo   3. Stress Test Progressive (100-1000 users)
-echo   4. Quick Smoke Test Original (5 users)
-echo   5. Semua Test Baru (Sequential)
-echo   6. Buka JMeter GUI
+echo   1. Load Test (500 users - sesuai NFR)
+echo   2. Stress Test Progressive (100-1000 users)
+echo   3. Volume Test (500 users - Large Data)
+echo   4. Semua Test (Sequential)
+echo   5. Buka JMeter GUI
 echo   0. Keluar
 echo.
-set /p choice="Pilih [0-6]: "
+set /p choice="Pilih [0-5]: "
 
-if "%choice%"=="1" goto comprehensive_test
-if "%choice%"=="2" goto load_test_500
-if "%choice%"=="3" goto stress_test
-if "%choice%"=="4" goto quick_test
-if "%choice%"=="5" goto all_tests
-if "%choice%"=="6" goto open_gui
+if "%choice%"=="1" goto load_test_500
+if "%choice%"=="2" goto stress_test
+if "%choice%"=="3" goto volume_test
+if "%choice%"=="4" goto all_tests
+if "%choice%"=="5" goto open_gui
 if "%choice%"=="0" goto end
 
 echo Pilihan tidak valid!
 pause
-goto end
-
-:comprehensive_test
-echo.
-echo =====================================================
-echo   Menjalankan Comprehensive Test (20 Users)...
-echo   Public Pages + Authenticated User Flow
-echo   Durasi estimasi: ~1-2 menit
-echo =====================================================
-echo.
-set RESULT_FILE=%OUTPUT_DIR%\comprehensive_test_%TIMESTAMP%.jtl
-set REPORT_DIR=%OUTPUT_DIR%\comprehensive_test_report_%TIMESTAMP%
-"%JMETER_HOME%\bin\jmeter.bat" -n -t "%TEST_DIR%SILAPOR_ComprehensiveTest.jmx" -l "%RESULT_FILE%" -e -o "%REPORT_DIR%"
-echo.
-echo Test selesai! Report tersedia di: %REPORT_DIR%\index.html
-start "" "%REPORT_DIR%\index.html"
 goto end
 
 :load_test_500
@@ -100,15 +82,17 @@ goto end
 
 :stress_test
 echo.
+echo ==Ramp-up: 60 detik
+echo   Duration: Hingga semua user diuji
+echo   Durasi estimasi: ~3-5 menit
 echo =====================================================
-echo   Menjalankan Stress Test Progressive...
-echo   Stage 1: 100 users (1 menit)
-echo   Stage 2: 300 users (1 menit)
-echo   Stage 3: 500 users (2 menit) - TARGET NFR
-echo   Stage 4: 750 users (2 menit)
-echo   Stage 5: 1000 users (2 menit) - STRESS
-echo   Total durasi: ~8-10 menit
 echo.
+set /p confirm="Yakin ingin melanjutkan? (y/n): "
+if /i not "%confirm%"=="y" goto end
+echo.
+set RESULT_FILE=%OUTPUT_DIR%\load_test_500_%TIMESTAMP%.jtl
+set REPORT_DIR=%OUTPUT_DIR%\load_test_500_report_%TIMESTAMP%
+"%JMETER_HOME%\bin\jmeter.bat" -n -t "%TEST_DIR%SILAPOR_LoadTest_Fixed
 echo   WARNING: Test ini akan membebani server dengan load tinggi!
 echo =====================================================
 echo.
@@ -121,45 +105,55 @@ set REPORT_DIR=%OUTPUT_DIR%\stress_test_progressive_report_%TIMESTAMP%
 echo.
 echo Test selesai! Report tersedia di: %REPORT_DIR%\index.html
 start "" "%REPORT_DIR%\index.html"
-goto end
-
-:quick_test
+gvolume_test
 echo.
 echo =====================================================
-echo   Menjalankan Quick Smoke Test Original (5 Users)...
+echo   Menjalankan Volume Test (500 Users - Large Data)...
+echo   Test performance dengan data volume besar
+echo   Fokus: Pagination, Query Performance, Filtering
+echo   Users: 500 concurrent
+echo   Duration: 5 menit
+echo   Durasi estimasi: ~5-7 menit
 echo =====================================================
 echo.
-set RESULT_FILE=%OUTPUT_DIR%\quick_test_%TIMESTAMP%.jtl
-set REPORT_DIR=%OUTPUT_DIR%\quick_test_report_%TIMESTAMP%
-"%JMETER_HOME%\bin\jmeter.bat" -n -t "%TEST_DIR%SILAPOR_QuickTest.jmx" -l "%RESULT_FILE%" -e -o "%REPORT_DIR%"
+set /p confirm="Yakin ingin melanjutkan? (y/n): "
+if /i not "%confirm%"=="y" goto end
 echo.
-echo Test selesai! Report tersedia di: %REPORT_DIR%\index.html
-start "" "%REPORT_DIR%\index.html"
-goto end
-
-:all_tests
+set RESULT_FILE=%OUTPUT_DIR%\volume_test_%TIMESTAMP%.jtl
+set REPORT_DIR=%OUTPUT_DIR%\volume_test_report_%TIMESTAMP%
+"%JMETER_HOME%\bin\jmeter.bat" -n -t "%TEST_DIR%SILAPOR_Volume
+set REPORT_DIR=%OUTPUT_DIR%\quSecara Berurutan...
+echo   1. Load Test (500 users)
+echo   2. Stress Test (100-1000 users)
+echo   3. Volume Test (500 users - Large Data)
+echo   Total durasi: ~18-22 menit
 echo.
-echo =====================================================
-echo   Menjalankan Semua Test Baru Secara Berurutan...
-echo   1. Comprehensive Test (20 users)
-echo   2. Load Test (500 users)
-echo   3. Stress Test (100-1000 users)
-echo   Total durasi: ~15-20 menit
+echo   WARNING: Test ini akan berjalan sangat lama!
 echo =====================================================
 echo.
 set /p confirm="Yakin ingin melanjutkan? (y/n): "
 if /i not "%confirm%"=="y" goto end
 echo.
 
-echo [1/3] Comprehensive Test (20 users)...
-set RESULT_FILE=%OUTPUT_DIR%\comprehensive_test_%TIMESTAMP%.jtl
-set REPORT_DIR=%OUTPUT_DIR%\comprehensive_test_report_%TIMESTAMP%
-"%JMETER_HOME%\bin\jmeter.bat" -n -t "%TEST_DIR%SILAPOR_ComprehensiveTest.jmx" -l "%RESULT_FILE%" -e -o "%REPORT_DIR%"
-echo Comprehensive Test selesai!
+echo [1/3] Load Test (500 users)...
+set RESULT_FILE=%OUTPUT_DIR%\load_test_500_%TIMESTAMP%.jtl
+set REPORT_DIR=%OUTPUT_DIR%\load_test_500_report_%TIMESTAMP%
+"%JMETER_HOME%\bin\jmeter.bat" -n -t "%TEST_DIR%SILAPOR_LoadTest_Fixed.jmx" -l "%RESULT_FILE%" -e -o "%REPORT_DIR%"
+echo Load Test selesai!
 echo.
 
-echo [2/3] Load Test (500 users)...
-set RESULT_FILE=%OUTPUT_DIR%\load_test_500_%TIMESTAMP%.jtl
+echo [2/3] Stress Test Progressive (100-1000 users)...
+set RESULT_FILE=%OUTPUT_DIR%\stress_test_progressive_%TIMESTAMP%.jtl
+set REPORT_DIR=%OUTPUT_DIR%\stress_test_progressive_report_%TIMESTAMP%
+"%JMETER_HOME%\bin\jmeter.bat" -n -t "%TEST_DIR%SILAPOR_StressTest_Progressive.jmx" -l "%RESULT_FILE%" -e -o "%REPORT_DIR%"
+echo Stress Test selesai!
+echo.
+
+echo [3/3] Volume Test (500 users - Large Data)...
+set RESULT_FILE=%OUTPUT_DIR%\volume_test_%TIMESTAMP%.jtl
+set REPORT_DIR=%OUTPUT_DIR%\volume_test_report_%TIMESTAMP%
+"%JMETER_HOME%\bin\jmeter.bat" -n -t "%TEST_DIR%SILAPOR_VolumeTest.jmx" -l "%RESULT_FILE%" -e -o "%REPORT_DIR%"
+echo VolumeFILE=%OUTPUT_DIR%\load_test_500_%TIMESTAMP%.jtl
 set REPORT_DIR=%OUTPUT_DIR%\load_test_500_report_%TIMESTAMP%
 "%JMETER_HOME%\bin\jmeter.bat" -n -t "%TEST_DIR%SILAPOR_LoadTest_500Users.jmx" -l "%RESULT_FILE%" -e -o "%REPORT_DIR%"
 echo Load Test selesai!
