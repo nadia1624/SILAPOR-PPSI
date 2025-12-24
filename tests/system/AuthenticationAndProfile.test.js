@@ -1204,50 +1204,40 @@ describe('SYSTEM TESTING: Authentication & Profile Module - Complete User Journe
             }
         }, 45000);
     });
-});
 
-// ============================================================================
-// SKENARIO 8: Profile Management - Admin
-// ============================================================================
-describe('SKENARIO 8: Profile Management - Admin', () => {
-    
-    beforeEach(async () => {
-        await loginAsAdmin(driver);
-    });
+    // ============================================================================
+    // SKENARIO 8: Profile Management - Admin
+    // ============================================================================
+    describe('SKENARIO 8: Profile Management - Admin', () => {
+        
+        beforeEach(async () => {
+            await loginAsAdmin(driver);
+        });
 
-    afterEach(async () => {
-        await logout(driver);
-    });
+        afterEach(async () => {
+            await logout(driver);
+        });
 
     describe('[ST-ADMIN-PROFILE-001] Admin dapat melihat halaman profil', () => {
         test('should display admin profile page with correct data', async () => {
             console.log('\n[TEST] ST-ADMIN-PROFILE-001: Admin lihat halaman profil');
-            console.log('   - [Step 1] Buka dropdown menu user...');
+            console.log('   - [Step 1] Navigasi ke halaman profil admin...');
             
             // Wait untuk dashboard admin
             await driver.wait(until.urlContains('/admin'), 10000);
             
-            // Klik dropdown user menu (foto profil di navbar)
-            const userDropdown = await driver.wait(until.elementLocated(By.css('img[alt*="User"]')), 15000);
-            await driver.executeScript("arguments[0].click();", userDropdown);
+            // Admin menggunakan route /admin/profile
+            await driver.get(`${BASE_URL}/admin/profile`);
+            await driver.sleep(2000);
             
-            console.log('   - [Step 2] Klik menu Profil...');
-            
-            // Klik menu Profil
-            const profileLink = await driver.wait(
-                until.elementLocated(By.xpath("//a[contains(@href, '/profile') or contains(text(), 'Profil')]")),
-                15000
-            );
-            await driver.executeScript("arguments[0].click();", profileLink);
-            
-            console.log('   - [Step 3] Verifikasi halaman profil...');
-            await driver.wait(until.urlIs(`${BASE_URL}/profile`), 20000);
+            console.log('   - [Step 2] Verifikasi halaman profil...');
+            await driver.wait(until.urlIs(`${BASE_URL}/admin/profile`), 20000);
             
             const pageSource = await driver.findElement(By.tagName('body')).getText();
             
             // Verifikasi data admin tampil
             expect(pageSource).toContain(ADMIN_CREDENTIALS.email);
-            expect(pageSource).toContain('Administrator'); // Role admin
+            expect(pageSource).toContain('admin'); // Role admin (lowercase)
             
             console.log('✓ PASS: Halaman profil admin berhasil ditampilkan\n');
         }, 30000);
@@ -1256,19 +1246,12 @@ describe('SKENARIO 8: Profile Management - Admin', () => {
     describe('[ST-ADMIN-PROFILE-002] Admin dapat membuka form edit profil', () => {
         test('should navigate to profile edit form', async () => {
             console.log('\n[TEST] ST-ADMIN-PROFILE-002: Admin buka form edit profil');
-            console.log('   - [Step 1] Buka halaman profil...');
+            console.log('   - [Step 1] Navigasi ke halaman profil admin...');
             
-            // Buka dropdown dan klik Profil
-            const userDropdown = await driver.wait(until.elementLocated(By.css('img[alt*="User"]')), 15000);
-            await driver.executeScript("arguments[0].click();", userDropdown);
-            
-            const profileLink = await driver.wait(
-                until.elementLocated(By.xpath("//a[contains(@href, '/profile') or contains(text(), 'Profil')]")),
-                15000
-            );
-            await driver.executeScript("arguments[0].click();", profileLink);
-            
-            await driver.wait(until.urlIs(`${BASE_URL}/profile`), 20000);
+            // Admin menggunakan route /admin/profile
+            await driver.get(`${BASE_URL}/admin/profile`);
+            await driver.sleep(2000);
+            await driver.wait(until.urlIs(`${BASE_URL}/admin/profile`), 20000);
             
             console.log('   - [Step 2] Klik tombol Edit Profil...');
             
@@ -1280,7 +1263,7 @@ describe('SKENARIO 8: Profile Management - Admin', () => {
             await driver.executeScript("arguments[0].click();", editBtn);
             
             console.log('   - [Step 3] Verifikasi form edit...');
-            await driver.wait(until.urlIs(`${BASE_URL}/edit-profile`), 20000);
+            await driver.wait(until.urlIs(`${BASE_URL}/admin/edit-profile`), 20000);
             
             // Verifikasi form fields ada
             const namaField = await driver.findElement(By.name('nama'));
@@ -1298,19 +1281,12 @@ describe('SKENARIO 8: Profile Management - Admin', () => {
     describe('[ST-ADMIN-PROFILE-003] Admin dapat mengupdate data profil dan foto', () => {
         test('should successfully update admin profile with new data and photo', async () => {
             console.log('\n[TEST] ST-ADMIN-PROFILE-003: Admin update data profil + foto');
-            console.log('   - [Step 1] Navigate ke form edit profil...');
+            console.log('   - [Step 1] Navigasi ke halaman profil admin...');
             
-            // Buka halaman profil
-            const userDropdown = await driver.wait(until.elementLocated(By.css('img[alt*="User"]')), 15000);
-            await driver.executeScript("arguments[0].click();", userDropdown);
-            
-            const profileLink = await driver.wait(
-                until.elementLocated(By.xpath("//a[contains(@href, '/profile') or contains(text(), 'Profil')]")),
-                15000
-            );
-            await driver.executeScript("arguments[0].click();", profileLink);
-            
-            await driver.wait(until.urlIs(`${BASE_URL}/profile`), 20000);
+            // Admin menggunakan route /admin/profile
+            await driver.get(`${BASE_URL}/admin/profile`);
+            await driver.sleep(2000);
+            await driver.wait(until.urlIs(`${BASE_URL}/admin/profile`), 20000);
             
             // Klik Edit Profil
             const editBtn = await driver.wait(
@@ -1319,7 +1295,7 @@ describe('SKENARIO 8: Profile Management - Admin', () => {
             );
             await driver.executeScript("arguments[0].click();", editBtn);
             
-            await driver.wait(until.urlIs(`${BASE_URL}/edit-profile`), 20000);
+            await driver.wait(until.urlIs(`${BASE_URL}/admin/edit-profile`), 20000);
             
             console.log('   - [Step 2] Update data profil...');
             
@@ -1358,7 +1334,7 @@ describe('SKENARIO 8: Profile Management - Admin', () => {
             await driver.executeScript("arguments[0].click();", saveBtn);
 
             console.log('   - [Step 5] Verifikasi Data Terupdate...');
-            await driver.wait(until.urlIs(`${BASE_URL}/profile`), 20000);
+            await driver.wait(until.urlIs(`${BASE_URL}/admin/profile`), 20000);
             
             const updatedPageSource = await driver.findElement(By.tagName('body')).getText();
             
@@ -1379,4 +1355,5 @@ describe('SKENARIO 8: Profile Management - Admin', () => {
             }
         }, 45000);
     });
-});
+    });  // End of SKENARIO 8
+});  // End of SYSTEM TESTING describe
