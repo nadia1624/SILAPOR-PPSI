@@ -140,22 +140,16 @@ describe('SYSTEM TESTING: Admin My Reports (CRUD) - End to End Scenarios', () =>
                 await driver.wait(until.elementLocated(By.name('nama_barang')), 10000);
                 const formExists = await driver.findElement(By.name('nama_barang')).isDisplayed();
                 expect(formExists).toBe(true);
-                console.log('✓ PASS: Form pembuatan laporan dapat diakses oleh admin');
             } catch (error) {
-                console.error(`Gagal memuat form di ${ADMIN_FORM_URL}. Pastikan route benar.`);
                 throw error;
             }
         }, 20000);
 
         test('ST-MY-ADMIN-002: Admin sukses membuat laporan baru dan redirect ke my-reports', async () => {
-            console.log('   - Mengakses Form Laporan Admin...');
-            
             await driver.get(ADMIN_FORM_URL);
             await driver.wait(until.elementLocated(By.name('nama_barang')), 10000);
 
             // Isi Form
-            console.log('   - Mengisi data laporan...');
-            
             await driver.findElement(By.name('jenis_laporan')).sendKeys('Kehilangan');
             await driver.findElement(By.name('nama_barang')).sendKeys(TEST_DATA.judul);
             
@@ -175,11 +169,9 @@ describe('SYSTEM TESTING: Admin My Reports (CRUD) - End to End Scenarios', () =>
             await driver.findElement(By.name('deskripsi')).sendKeys(TEST_DATA.deskripsi);
             
             // Upload gambar
-            console.log('   - Upload bukti foto...');
             await driver.findElement(By.name('foto_barang')).sendKeys(DUMMY_IMG_PATH);
 
             // Submit
-            console.log('   - Mengirim laporan...');
             const submitBtn = await driver.findElement(By.css('button[type="submit"]'));
             await driver.executeScript("arguments[0].click();", submitBtn);
 
@@ -189,7 +181,6 @@ describe('SYSTEM TESTING: Admin My Reports (CRUD) - End to End Scenarios', () =>
             const currentUrl = await driver.getCurrentUrl();
             expect(currentUrl).toContain('/admin/my-reports');
             
-            console.log('✓ PASS: Admin sukses membuat laporan dan redirect ke My Reports');
         }, 40000);
 
         test('ST-MY-ADMIN-003: Validasi form - tidak dapat submit tanpa field wajib', async () => {
@@ -208,7 +199,6 @@ describe('SYSTEM TESTING: Admin My Reports (CRUD) - End to End Scenarios', () =>
             const isStillOnForm = currentUrl.includes('/reports') || currentUrl.includes('report');
             expect(isStillOnForm).toBe(true);
 
-            console.log('✓ PASS: Form tidak dapat disubmit tanpa mengisi field wajib');
         }, 20000);
     });
 
@@ -227,7 +217,6 @@ describe('SYSTEM TESTING: Admin My Reports (CRUD) - End to End Scenarios', () =>
             const bodyText = await driver.findElement(By.tagName('body')).getText();
             expect(bodyText).toContain(TEST_DATA.judul);
 
-            console.log('✓ PASS: Daftar laporan saya dapat ditampilkan');
         }, 20000);
 
         test('ST-MY-ADMIN-005: Verifikasi visual kartu laporan (Judul, Lokasi, Deskripsi)', async () => {
@@ -249,7 +238,6 @@ describe('SYSTEM TESTING: Admin My Reports (CRUD) - End to End Scenarios', () =>
             expect(cardText).toContain(TEST_DATA.lokasi);
             expect(cardText).toContain(TEST_DATA.deskripsi);
 
-            console.log('✓ PASS: Kartu laporan menampilkan informasi yang benar');
         }, 20000);
 
         test('ST-MY-ADMIN-006: Admin dapat melihat status laporan', async () => {
@@ -272,13 +260,10 @@ describe('SYSTEM TESTING: Admin My Reports (CRUD) - End to End Scenarios', () =>
             const foundStatus = possibleStatuses.find(status => bodyText.includes(status));
             
             if (foundStatus) {
-                console.log(`   ✓ Status terdeteksi: "${foundStatus}"`);
             } else {
-                console.log('   ⚠ Warning: Status laporan tidak terdeteksi atau menggunakan bahasa lain');
             }
 
             expect(bodyText.length).toBeGreaterThan(0);
-            console.log('✓ PASS: Halaman status laporan dapat diakses');
         }, 20000);
     });
 
@@ -300,7 +285,6 @@ describe('SYSTEM TESTING: Admin My Reports (CRUD) - End to End Scenarios', () =>
             await driver.wait(until.elementIsVisible(modal), 5000);
 
             expect(await modal.isDisplayed()).toBeTruthy();
-            console.log('✓ PASS: Modal detail laporan berhasil terbuka');
         }, 20000);
 
         test('ST-MY-ADMIN-008: Modal detail menampilkan informasi lengkap', async () => {
@@ -325,8 +309,6 @@ describe('SYSTEM TESTING: Admin My Reports (CRUD) - End to End Scenarios', () =>
 
             const modalNama = await namaElement.getText();
             expect(modalNama).toBe(TEST_DATA.judul);
-
-            console.log('✓ PASS: Modal detail menampilkan informasi yang benar');
 
             // Tutup Modal
             const closeBtn = await modal.findElement(By.xpath(".//button[contains(., 'Tutup')]"));
@@ -358,7 +340,6 @@ describe('SYSTEM TESTING: Admin My Reports (CRUD) - End to End Scenarios', () =>
                 // Modal mungkin sudah tidak ada di DOM
             }
 
-            console.log('✓ PASS: Tombol Tutup modal berfungsi dengan baik');
         }, 20000);
     });
 
@@ -378,7 +359,6 @@ describe('SYSTEM TESTING: Admin My Reports (CRUD) - End to End Scenarios', () =>
             await driver.wait(until.elementIsVisible(editModal), 5000);
 
             expect(await editModal.isDisplayed()).toBeTruthy();
-            console.log('✓ PASS: Modal edit laporan berhasil terbuka');
         }, 20000);
 
         test('ST-MY-ADMIN-011: Admin dapat mengedit laporan dan menyimpan perubahan', async () => {
@@ -410,7 +390,6 @@ describe('SYSTEM TESTING: Admin My Reports (CRUD) - End to End Scenarios', () =>
             const bodyText = await driver.findElement(By.tagName('body')).getText();
             expect(bodyText).toContain(TEST_DATA.judul_edit);
 
-            console.log('✓ PASS: Laporan berhasil diedit dan perubahan tersimpan');
         }, 20000);
 
         test('ST-MY-ADMIN-012: Perubahan edit terlihat di daftar laporan', async () => {
@@ -424,7 +403,6 @@ describe('SYSTEM TESTING: Admin My Reports (CRUD) - End to End Scenarios', () =>
             expect(bodyText).toContain(TEST_DATA.judul_edit);
             // Note: Tidak cek judul lama karena bisa ada laporan lain dengan nama serupa
 
-            console.log('✓ PASS: Perubahan edit terlihat di daftar laporan');
         }, 20000);
     });
 
@@ -458,7 +436,6 @@ describe('SYSTEM TESTING: Admin My Reports (CRUD) - End to End Scenarios', () =>
             const bodyText = await driver.findElement(By.tagName('body')).getText();
             expect(bodyText).not.toContain(TEST_DATA.judul_edit);
 
-            console.log('✓ PASS: Laporan berhasil dihapus');
         }, 30000);
     });
 
@@ -477,7 +454,6 @@ describe('SYSTEM TESTING: Admin My Reports (CRUD) - End to End Scenarios', () =>
             const bodyText = await driver.findElement(By.tagName('body')).getText();
             expect(bodyText.length).toBeGreaterThan(0);
 
-            console.log('✓ PASS: Halaman dashboard dapat diakses');
         }, 20000);
 
         test('ST-MY-ADMIN-015: Admin dapat mengakses halaman pengajuan (semua laporan)', async () => {
@@ -490,7 +466,6 @@ describe('SYSTEM TESTING: Admin My Reports (CRUD) - End to End Scenarios', () =>
             const bodyText = await driver.findElement(By.tagName('body')).getText();
             expect(bodyText.length).toBeGreaterThan(0);
 
-            console.log('✓ PASS: Halaman pengajuan dapat diakses');
         }, 20000);
 
         test('ST-MY-ADMIN-016: Dapat berpindah dari dashboard ke my-reports', async () => {
@@ -507,13 +482,11 @@ describe('SYSTEM TESTING: Admin My Reports (CRUD) - End to End Scenarios', () =>
 
                 const currentUrl = await driver.getCurrentUrl();
                 expect(currentUrl).toContain('/my-reports');
-                console.log('✓ PASS: Navigasi ke My Reports berhasil');
             } catch (e) {
                 // Jika tidak ada link, navigasi langsung
                 await driver.get(ADMIN_MY_REPORTS_URL);
                 const currentUrl = await driver.getCurrentUrl();
                 expect(currentUrl).toContain('/my-reports');
-                console.log('✓ PASS: My Reports dapat diakses via URL langsung');
             }
         }, 20000);
 
@@ -532,12 +505,10 @@ describe('SYSTEM TESTING: Admin My Reports (CRUD) - End to End Scenarios', () =>
                 // Verifikasi form laporan muncul
                 const formExists = await driver.findElement(By.name('nama_barang')).isDisplayed();
                 expect(formExists).toBe(true);
-                console.log('✓ PASS: Navigasi ke form Buat Laporan berhasil');
             } catch (e) {
                 await driver.get(ADMIN_FORM_URL);
                 const formExists = await driver.findElement(By.name('nama_barang')).isDisplayed();
                 expect(formExists).toBe(true);
-                console.log('✓ PASS: Form Buat Laporan dapat diakses via URL langsung');
             }
         }, 20000);
     });
@@ -557,7 +528,6 @@ describe('SYSTEM TESTING: Admin My Reports (CRUD) - End to End Scenarios', () =>
             const hasContent = bodyText.length > 100;
             expect(hasContent).toBe(true);
 
-            console.log('✓ PASS: Halaman my-reports dapat menangani state kosong/berisi');
         }, 20000);
 
         test('ST-MY-ADMIN-019: Session admin tetap valid setelah beberapa navigasi', async () => {
@@ -577,7 +547,6 @@ describe('SYSTEM TESTING: Admin My Reports (CRUD) - End to End Scenarios', () =>
             const currentUrl = await driver.getCurrentUrl();
             expect(currentUrl).toContain('/admin');
 
-            console.log('✓ PASS: Session admin tetap valid setelah navigasi');
         }, 30000);
 
         test('ST-MY-ADMIN-020: Admin dapat mengakses halaman tanpa error', async () => {
@@ -594,7 +563,6 @@ describe('SYSTEM TESTING: Admin My Reports (CRUD) - End to End Scenarios', () =>
             const bodyText = await driver.findElement(By.tagName('body')).getText();
             expect(bodyText.length).toBeGreaterThan(0);
 
-            console.log('✓ PASS: Halaman admin dapat diakses tanpa error');
         }, 20000);
     });
 });

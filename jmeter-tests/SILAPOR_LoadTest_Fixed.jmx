@@ -1,8 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <jmeterTestPlan version="1.2" properties="5.0" jmeter="5.6.3">
   <hashTree>
-    <TestPlan guiclass="TestPlanGui" testclass="TestPlan" testname="SILAPOR - Load Test 500 Users (Fixed)" enabled="true">
-      <boolProp name="TestPlan.functional_mode">false</boolProp>
+    <TestPlan guiclass="TestPlanGui" testclass="TestPlan" testname="SILAPOR - Load Test 500 Users (Fixed)">
+      <stringProp name="TestPlan.comments">SILAPOR Load Test - 500 Concurrent Users (490 Mahasiswa + 10 Admin)
+Sesuai NFR: Sistem harus handle 500+ concurrent users
+Response time target: &lt; 2 detik
+Focus: Comprehensive authenticated user flow testing</stringProp>
       <boolProp name="TestPlan.tearDown_on_shutdown">true</boolProp>
       <elementProp name="TestPlan.user_defined_variables" elementType="Arguments" guiclass="ArgumentsPanel" testclass="Arguments" testname="User Defined Variables">
         <collectionProp name="Arguments.arguments">
@@ -28,10 +31,6 @@
           </elementProp>
         </collectionProp>
       </elementProp>
-      <stringProp name="TestPlan.comments">SILAPOR Load Test - 500 Concurrent Users (490 Mahasiswa + 10 Admin)
-Sesuai NFR: Sistem harus handle 500+ concurrent users
-Response time target: &lt; 2 detik
-Focus: Comprehensive authenticated user flow testing</stringProp>
     </TestPlan>
     <hashTree>
       <ConfigTestElement guiclass="HttpDefaultsGui" testclass="ConfigTestElement" testname="HTTP Request Defaults">
@@ -47,9 +46,7 @@ Focus: Comprehensive authenticated user flow testing</stringProp>
         <stringProp name="HTTPSampler.implementation"></stringProp>
       </ConfigTestElement>
       <hashTree/>
-      
-      <!-- HTTP Header Manager -->
-      <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="HTTP Header Manager">
+      <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="HTTP Header Manager" enabled="true">
         <collectionProp name="HeaderManager.headers">
           <elementProp name="" elementType="Header">
             <stringProp name="Header.name">User-Agent</stringProp>
@@ -62,14 +59,12 @@ Focus: Comprehensive authenticated user flow testing</stringProp>
         </collectionProp>
       </HeaderManager>
       <hashTree/>
-      
-      <!-- ============================================== -->
-      <!-- MAHASISWA USER SCENARIO - COMPREHENSIVE -->
-      <!-- ============================================== -->
-      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="Mahasiswa Users - 490 Users" enabled="true">
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="Mahasiswa Users - 490 Users">
         <stringProp name="TestPlan.comments">490 mahasiswa users - full application flow (comprehensive)</stringProp>
-        <stringProp name="ThreadGroup.num_threads">490</stringProp>
-        <stringProp name="ThreadGroup.ramp_time">60</stringProp>
+        <intProp name="ThreadGroup.num_threads">490</intProp>
+        <intProp name="ThreadGroup.ramp_time">60</intProp>
+        <longProp name="ThreadGroup.duration">5000</longProp>
+        <longProp name="ThreadGroup.delay">2</longProp>
         <boolProp name="ThreadGroup.same_user_on_next_iteration">true</boolProp>
         <boolProp name="ThreadGroup.scheduler">true</boolProp>
         <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
@@ -79,7 +74,7 @@ Focus: Comprehensive authenticated user flow testing</stringProp>
         </elementProp>
       </ThreadGroup>
       <hashTree>
-        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Login Mahasiswa">
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Login Mahasiswa" enabled="true">
           <stringProp name="HTTPSampler.path">/login</stringProp>
           <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
           <stringProp name="HTTPSampler.method">POST</stringProp>
@@ -105,7 +100,7 @@ Focus: Comprehensive authenticated user flow testing</stringProp>
           </elementProp>
         </HTTPSamplerProxy>
         <hashTree/>
-        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Mahasiswa Home">
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Mahasiswa Home" enabled="true">
           <stringProp name="HTTPSampler.path">/mahasiswa/home</stringProp>
           <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
           <stringProp name="HTTPSampler.method">GET</stringProp>
@@ -116,7 +111,7 @@ Focus: Comprehensive authenticated user flow testing</stringProp>
           </elementProp>
         </HTTPSamplerProxy>
         <hashTree/>
-        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="My Reports">
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="My Reports" enabled="true">
           <stringProp name="HTTPSampler.path">/mahasiswa/my-reports</stringProp>
           <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
           <stringProp name="HTTPSampler.method">GET</stringProp>
@@ -127,7 +122,7 @@ Focus: Comprehensive authenticated user flow testing</stringProp>
           </elementProp>
         </HTTPSamplerProxy>
         <hashTree/>
-        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="My Claims">
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="My Claims" enabled="true">
           <stringProp name="HTTPSampler.path">/mahasiswa/my-claim</stringProp>
           <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
           <stringProp name="HTTPSampler.method">GET</stringProp>
@@ -138,7 +133,7 @@ Focus: Comprehensive authenticated user flow testing</stringProp>
           </elementProp>
         </HTTPSamplerProxy>
         <hashTree/>
-        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Report Form Page">
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Report Form Page" enabled="true">
           <stringProp name="HTTPSampler.path">/mahasiswa/report-form</stringProp>
           <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
           <stringProp name="HTTPSampler.method">GET</stringProp>
@@ -149,7 +144,7 @@ Focus: Comprehensive authenticated user flow testing</stringProp>
           </elementProp>
         </HTTPSamplerProxy>
         <hashTree/>
-        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Profile Page">
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Profile Page" enabled="true">
           <stringProp name="HTTPSampler.path">/mahasiswa/profile</stringProp>
           <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
           <stringProp name="HTTPSampler.method">GET</stringProp>
@@ -180,7 +175,7 @@ Focus: Comprehensive authenticated user flow testing</stringProp>
         </elementProp>
       </ThreadGroup>
       <hashTree>
-        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Login Admin">
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Login Admin" enabled="true">
           <stringProp name="HTTPSampler.path">/login</stringProp>
           <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
           <stringProp name="HTTPSampler.method">POST</stringProp>
@@ -206,7 +201,7 @@ Focus: Comprehensive authenticated user flow testing</stringProp>
           </elementProp>
         </HTTPSamplerProxy>
         <hashTree/>
-        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Admin Dashboard">
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Admin Dashboard" enabled="true">
           <stringProp name="HTTPSampler.path">/admin/dashboard</stringProp>
           <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
           <stringProp name="HTTPSampler.method">GET</stringProp>
@@ -216,7 +211,7 @@ Focus: Comprehensive authenticated user flow testing</stringProp>
           </elementProp>
         </HTTPSamplerProxy>
         <hashTree/>
-        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Admin Reports">
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Admin Reports" enabled="true">
           <stringProp name="HTTPSampler.path">/admin/my-reports</stringProp>
           <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
           <stringProp name="HTTPSampler.method">GET</stringProp>
@@ -226,7 +221,7 @@ Focus: Comprehensive authenticated user flow testing</stringProp>
           </elementProp>
         </HTTPSamplerProxy>
         <hashTree/>
-        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Admin Claims">
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Admin Claims" enabled="true">
           <stringProp name="HTTPSampler.path">/admin/my-claim</stringProp>
           <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
           <stringProp name="HTTPSampler.method">GET</stringProp>
@@ -236,7 +231,7 @@ Focus: Comprehensive authenticated user flow testing</stringProp>
           </elementProp>
         </HTTPSamplerProxy>
         <hashTree/>
-        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Admin Users">
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Admin Users" enabled="true">
           <stringProp name="HTTPSampler.path">/admin/userList</stringProp>
           <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
           <stringProp name="HTTPSampler.method">GET</stringProp>
@@ -246,7 +241,7 @@ Focus: Comprehensive authenticated user flow testing</stringProp>
           </elementProp>
         </HTTPSamplerProxy>
         <hashTree/>
-        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Admin History">
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Admin History" enabled="true">
           <stringProp name="HTTPSampler.path">/admin/history</stringProp>
           <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
           <stringProp name="HTTPSampler.method">GET</stringProp>
@@ -256,7 +251,7 @@ Focus: Comprehensive authenticated user flow testing</stringProp>
           </elementProp>
         </HTTPSamplerProxy>
         <hashTree/>
-        <ConstantTimer guiclass="ConstantTimerGui" testclass="ConstantTimer" testname="Think Time">
+        <ConstantTimer guiclass="ConstantTimerGui" testclass="ConstantTimer" testname="Think Time" enabled="true">
           <stringProp name="ConstantTimer.delay">1500</stringProp>
         </ConstantTimer>
         <hashTree/>
@@ -294,6 +289,7 @@ Focus: Comprehensive authenticated user flow testing</stringProp>
             <stringProp name="Assertion.test_field">Assertion.response_code</stringProp>
             <boolProp name="Assertion.assume_success">false</boolProp>
             <intProp name="Assertion.test_type">8</intProp>
+            <stringProp name="Assertion.custom_message"></stringProp>
           </ResponseAssertion>
           <hashTree/>
           <DurationAssertion guiclass="DurationAssertionGui" testclass="DurationAssertion" testname="Assert Response Time &lt; 2s" enabled="true">
@@ -318,6 +314,7 @@ Focus: Comprehensive authenticated user flow testing</stringProp>
             <stringProp name="Assertion.test_field">Assertion.response_code</stringProp>
             <boolProp name="Assertion.assume_success">false</boolProp>
             <intProp name="Assertion.test_type">8</intProp>
+            <stringProp name="Assertion.custom_message"></stringProp>
           </ResponseAssertion>
           <hashTree/>
           <DurationAssertion guiclass="DurationAssertionGui" testclass="DurationAssertion" testname="Assert Response Time &lt; 2s" enabled="true">
@@ -342,6 +339,7 @@ Focus: Comprehensive authenticated user flow testing</stringProp>
             <stringProp name="Assertion.test_field">Assertion.response_code</stringProp>
             <boolProp name="Assertion.assume_success">false</boolProp>
             <intProp name="Assertion.test_type">8</intProp>
+            <stringProp name="Assertion.custom_message"></stringProp>
           </ResponseAssertion>
           <hashTree/>
           <DurationAssertion guiclass="DurationAssertionGui" testclass="DurationAssertion" testname="Assert Response Time &lt; 2s" enabled="true">
@@ -359,16 +357,12 @@ Focus: Comprehensive authenticated user flow testing</stringProp>
           </elementProp>
         </HTTPSamplerProxy>
         <hashTree/>
-        <ConstantTimer guiclass="ConstantTimerGui" testclass="ConstantTimer" testname="Think Time">
+        <ConstantTimer guiclass="ConstantTimerGui" testclass="ConstantTimer" testname="Think Time" enabled="true">
           <stringProp name="ConstantTimer.delay">800</stringProp>
         </ConstantTimer>
         <hashTree/>
       </hashTree>
-      
-      <!-- ============================================== -->
-      <!-- LISTENERS -->
-      <!-- ============================================== -->
-      <ResultCollector guiclass="ViewResultsFullVisualizer" testclass="ResultCollector" testname="View Results Tree">
+      <ResultCollector guiclass="ViewResultsFullVisualizer" testclass="ResultCollector" testname="View Results Tree" enabled="true">
         <boolProp name="ResultCollector.error_logging">false</boolProp>
         <objProp>
           <name>saveConfig</name>
@@ -442,7 +436,7 @@ Focus: Comprehensive authenticated user flow testing</stringProp>
         <stringProp name="filename"></stringProp>
       </ResultCollector>
       <hashTree/>
-      <ResultCollector guiclass="StatVisualizer" testclass="ResultCollector" testname="Aggregate Report">
+      <ResultCollector guiclass="StatVisualizer" testclass="ResultCollector" testname="Aggregate Report" enabled="true">
         <boolProp name="ResultCollector.error_logging">false</boolProp>
         <objProp>
           <name>saveConfig</name>

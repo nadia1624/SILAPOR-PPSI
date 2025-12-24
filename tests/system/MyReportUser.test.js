@@ -139,29 +139,22 @@ describe('SYSTEM TESTING: Mahasiswa My Reports (CRUD) - End to End Scenarios', (
                 await driver.wait(until.elementLocated(By.name('nama_barang')), 10000);
                 const formExists = await driver.findElement(By.name('nama_barang')).isDisplayed();
                 expect(formExists).toBe(true);
-                console.log('✓ PASS: Form pembuatan laporan dapat diakses');
             } catch (error) {
-                console.error(`Gagal memuat form di ${USER_FORM_URL}. Pastikan route benar.`);
                 throw error;
             }
         }, 20000);
 
         test('ST-MY-USER-002: Mahasiswa sukses membuat laporan baru dan redirect ke my-reports', async () => {
-            console.log('   - Mengakses Form Laporan Mahasiswa...');
-            
             // Navigasi ke Form Laporan
             await driver.get(USER_FORM_URL);
             
             try {
                 await driver.wait(until.elementLocated(By.name('nama_barang')), 10000);
             } catch (error) {
-                console.error(`Gagal memuat form di ${USER_FORM_URL}. Pastikan route benar.`);
                 throw error;
             }
 
             // Isi Form
-            console.log('   - Mengisi data laporan...');
-            
             // Cek apakah ada elemen select 'jenis_laporan'
             try {
                 await driver.findElement(By.name('jenis_laporan')).sendKeys('Kehilangan');
@@ -187,7 +180,6 @@ describe('SYSTEM TESTING: Mahasiswa My Reports (CRUD) - End to End Scenarios', (
             await driver.findElement(By.name('deskripsi')).sendKeys(TEST_DATA.deskripsi);
             
             // Upload gambar
-            console.log('   - Upload bukti foto...');
             try {
                 await driver.findElement(By.name('foto_barang')).sendKeys(DUMMY_IMG_PATH);
             } catch (e) {
@@ -195,7 +187,6 @@ describe('SYSTEM TESTING: Mahasiswa My Reports (CRUD) - End to End Scenarios', (
             }
 
             // Submit
-            console.log('   - Mengirim laporan...');
             const submitBtn = await driver.findElement(By.css('button[type="submit"]'));
             await driver.executeScript("arguments[0].click();", submitBtn);
 
@@ -205,7 +196,6 @@ describe('SYSTEM TESTING: Mahasiswa My Reports (CRUD) - End to End Scenarios', (
             const currentUrl = await driver.getCurrentUrl();
             expect(currentUrl).toContain('/mahasiswa/my-reports');
             
-            console.log('✓ PASS: Mahasiswa sukses membuat laporan dan redirect ke My Reports');
         }, 40000);
 
         test('ST-MY-USER-003: Validasi form - tidak dapat submit tanpa field wajib', async () => {
@@ -226,7 +216,6 @@ describe('SYSTEM TESTING: Mahasiswa My Reports (CRUD) - End to End Scenarios', (
             const isStillOnForm = currentUrl.includes('/reports') || currentUrl.includes('report');
             expect(isStillOnForm).toBe(true);
 
-            console.log('✓ PASS: Form tidak dapat disubmit tanpa mengisi field wajib');
         }, 20000);
     });
 
@@ -245,7 +234,6 @@ describe('SYSTEM TESTING: Mahasiswa My Reports (CRUD) - End to End Scenarios', (
             const bodyText = await driver.findElement(By.tagName('body')).getText();
             expect(bodyText).toContain(TEST_DATA.judul);
 
-            console.log('✓ PASS: Daftar laporan saya dapat ditampilkan');
         }, 20000);
 
         test('ST-MY-USER-005: Verifikasi visual kartu laporan (Judul, Lokasi, Deskripsi)', async () => {
@@ -267,7 +255,6 @@ describe('SYSTEM TESTING: Mahasiswa My Reports (CRUD) - End to End Scenarios', (
             expect(cardText).toContain(TEST_DATA.lokasi);
             expect(cardText).toContain(TEST_DATA.deskripsi);
 
-            console.log('✓ PASS: Kartu laporan menampilkan informasi yang benar');
         }, 20000);
 
         test('ST-MY-USER-006: Mahasiswa dapat melihat status laporan', async () => {
@@ -290,13 +277,10 @@ describe('SYSTEM TESTING: Mahasiswa My Reports (CRUD) - End to End Scenarios', (
             const foundStatus = possibleStatuses.find(status => bodyText.includes(status));
             
             if (foundStatus) {
-                console.log(`   ✓ Status terdeteksi: "${foundStatus}"`);
             } else {
-                console.log('   ⚠ Warning: Status laporan tidak terdeteksi atau menggunakan bahasa lain');
             }
 
             expect(bodyText.length).toBeGreaterThan(0);
-            console.log('✓ PASS: Halaman status laporan dapat diakses');
         }, 20000);
     }); 
 
@@ -318,7 +302,6 @@ describe('SYSTEM TESTING: Mahasiswa My Reports (CRUD) - End to End Scenarios', (
             await driver.wait(until.elementIsVisible(modal), 5000);
 
             expect(await modal.isDisplayed()).toBeTruthy();
-            console.log('✓ PASS: Modal detail laporan berhasil terbuka');
         }, 20000);
 
         test('ST-MY-USER-008: Modal detail menampilkan informasi lengkap', async () => {
@@ -343,8 +326,6 @@ describe('SYSTEM TESTING: Mahasiswa My Reports (CRUD) - End to End Scenarios', (
 
             const modalNama = await namaElement.getText();
             expect(modalNama).toBe(TEST_DATA.judul);
-
-            console.log('✓ PASS: Modal detail menampilkan informasi yang benar');
 
             // Tutup Modal
             const closeBtn = await modal.findElement(By.xpath(".//button[contains(., 'Tutup')]"));
@@ -376,7 +357,6 @@ describe('SYSTEM TESTING: Mahasiswa My Reports (CRUD) - End to End Scenarios', (
                 // Modal mungkin sudah tidak ada di DOM
             }
 
-            console.log('✓ PASS: Tombol Tutup modal berfungsi dengan baik');
         }, 20000);
     });
 
@@ -396,7 +376,6 @@ describe('SYSTEM TESTING: Mahasiswa My Reports (CRUD) - End to End Scenarios', (
             await driver.wait(until.elementIsVisible(editModal), 5000);
 
             expect(await editModal.isDisplayed()).toBeTruthy();
-            console.log('✓ PASS: Modal edit laporan berhasil terbuka');
         }, 20000);
 
         test('ST-MY-USER-011: Mahasiswa dapat mengedit laporan dan menyimpan perubahan', async () => {
@@ -428,7 +407,6 @@ describe('SYSTEM TESTING: Mahasiswa My Reports (CRUD) - End to End Scenarios', (
             const bodyText = await driver.findElement(By.tagName('body')).getText();
             expect(bodyText).toContain(TEST_DATA.judul_edit);
 
-            console.log('✓ PASS: Laporan berhasil diedit dan perubahan tersimpan');
         }, 20000);
 
         test('ST-MY-USER-012: Perubahan edit terlihat di daftar laporan', async () => {
@@ -443,7 +421,6 @@ describe('SYSTEM TESTING: Mahasiswa My Reports (CRUD) - End to End Scenarios', (
             // Verifikasi judul lama tidak muncul lagi
             expect(bodyText).not.toContain(TEST_DATA.judul);
 
-            console.log('✓ PASS: Perubahan edit terlihat di daftar laporan');
         }, 20000);
     });
 
@@ -477,7 +454,6 @@ describe('SYSTEM TESTING: Mahasiswa My Reports (CRUD) - End to End Scenarios', (
             const bodyText = await driver.findElement(By.tagName('body')).getText();
             expect(bodyText).not.toContain(TEST_DATA.judul_edit);
 
-            console.log('✓ PASS: Laporan berhasil dihapus');
         }, 30000);
     });
 
@@ -496,7 +472,6 @@ describe('SYSTEM TESTING: Mahasiswa My Reports (CRUD) - End to End Scenarios', (
             const bodyText = await driver.findElement(By.tagName('body')).getText();
             expect(bodyText.length).toBeGreaterThan(0);
 
-            console.log('✓ PASS: Halaman home dapat diakses');
         }, 20000);
 
         test('ST-MY-USER-015: Dapat berpindah dari home ke my-reports', async () => {
@@ -513,13 +488,11 @@ describe('SYSTEM TESTING: Mahasiswa My Reports (CRUD) - End to End Scenarios', (
 
                 const currentUrl = await driver.getCurrentUrl();
                 expect(currentUrl).toContain('/my-reports');
-                console.log('✓ PASS: Navigasi ke My Reports berhasil');
             } catch (e) {
                 // Jika tidak ada link, navigasi langsung
                 await driver.get(USER_MY_REPORTS_URL);
                 const currentUrl = await driver.getCurrentUrl();
                 expect(currentUrl).toContain('/my-reports');
-                console.log('✓ PASS: My Reports dapat diakses via URL langsung');
             }
         }, 20000);
 
@@ -538,12 +511,10 @@ describe('SYSTEM TESTING: Mahasiswa My Reports (CRUD) - End to End Scenarios', (
                 // Verifikasi form laporan muncul
                 const formExists = await driver.findElement(By.name('nama_barang')).isDisplayed();
                 expect(formExists).toBe(true);
-                console.log('✓ PASS: Navigasi ke form Buat Laporan berhasil');
             } catch (e) {
                 await driver.get(USER_FORM_URL);
                 const formExists = await driver.findElement(By.name('nama_barang')).isDisplayed();
                 expect(formExists).toBe(true);
-                console.log('✓ PASS: Form Buat Laporan dapat diakses via URL langsung');
             }
         }, 20000);
     });
@@ -563,7 +534,6 @@ describe('SYSTEM TESTING: Mahasiswa My Reports (CRUD) - End to End Scenarios', (
             const hasContent = bodyText.length > 100;
             expect(hasContent).toBe(true);
 
-            console.log('✓ PASS: Halaman my-reports dapat menangani state kosong/berisi');
         }, 20000);
 
         test('ST-MY-USER-018: Session tetap valid setelah beberapa navigasi', async () => {
@@ -581,7 +551,6 @@ describe('SYSTEM TESTING: Mahasiswa My Reports (CRUD) - End to End Scenarios', (
             const currentUrl = await driver.getCurrentUrl();
             expect(currentUrl).toContain('/mahasiswa');
 
-            console.log('✓ PASS: Session tetap valid setelah navigasi');
         }, 30000);
     });
 });

@@ -64,7 +64,6 @@ describe('SYSTEM TESTING: Riwayat Laporan Selesai (Mahasiswa)', () => {
 
         // Cek apakah ada tombol detail atau tidak ada laporan
         const buttons = await driver.findElements(By.css('.detail-btn'));
-        console.log(`📋 Jumlah tombol detail: ${buttons.length}`);
         expect(true).toBe(true); // Test passes if page loads successfully
     }, 30000);
 
@@ -83,9 +82,7 @@ describe('SYSTEM TESTING: Riwayat Laporan Selesai (Mahasiswa)', () => {
             const modal = await driver.findElement(By.id('detailModal'));
             const isVisible = await modal.isDisplayed();
             expect(isVisible).toBe(true);
-            console.log('✅ Modal detail laporan ditampilkan');
         } else {
-            console.log('⚠️ Tidak ada laporan untuk diuji (skipping modal test)');
             expect(true).toBe(true);
         }
     }, 30000);
@@ -101,10 +98,8 @@ describe('SYSTEM TESTING: Riwayat Laporan Selesai (Mahasiswa)', () => {
         if (downloadButtons.length > 0) {
             await downloadButtons[0].click();
             await driver.sleep(2000);
-            console.log('📄 Tombol download PDF diklik');
             expect(true).toBe(true);
         } else {
-            console.log('⚠️ Tidak ada file PDF untuk di-download (skipping download test)');
             expect(true).toBe(true);
         }
     }, 30000);

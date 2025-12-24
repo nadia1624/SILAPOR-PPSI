@@ -84,7 +84,6 @@ describe('SYSTEM TESTING: Mahasiswa Claim Management - End to End Scenarios', ()
             const hasContent = bodyText.includes('Laporan Diklaim') || bodyText.includes('Klaim') || bodyText.length > 100;
             expect(hasContent).toBe(true);
 
-            console.log('✓ PASS: Mahasiswa dapat membuka halaman Klaim Saya');
         }, 30000);
 
         test('ST-CLAIM-MAH-002: Mahasiswa dapat melihat detail laporan klaim', async () => {
@@ -97,7 +96,6 @@ describe('SYSTEM TESTING: Mahasiswa Claim Management - End to End Scenarios', ()
                 );
 
                 if (!detailButtons.length) {
-                    console.log('ℹ INFO: Tidak ada klaim untuk dilihat detailnya');
                     return;
                 }
 
@@ -107,9 +105,7 @@ describe('SYSTEM TESTING: Mahasiswa Claim Management - End to End Scenarios', ()
                 const bodyText = await driver.findElement(By.tagName('body')).getText();
                 expect(bodyText.length).toBeGreaterThan(0);
 
-                console.log('✓ PASS: Detail laporan klaim dapat ditampilkan');
             } catch (error) {
-                console.log('ℹ INFO: Tidak ada klaim untuk dilihat detailnya');
             }
         }, 30000);
 
@@ -123,7 +119,6 @@ describe('SYSTEM TESTING: Mahasiswa Claim Management - End to End Scenarios', ()
                 );
 
                 if (!cancelButtons.length) {
-                    console.log('ℹ INFO: Tidak ada klaim dengan status "Waiting for approval" untuk dibatalkan');
                     return;
                 }
 
@@ -133,9 +128,7 @@ describe('SYSTEM TESTING: Mahasiswa Claim Management - End to End Scenarios', ()
                 const bodyText = await driver.findElement(By.tagName('body')).getText();
                 expect(bodyText.length).toBeGreaterThan(0);
 
-                console.log('✓ PASS: Mahasiswa dapat membatalkan klaim');
             } catch (error) {
-                console.log('ℹ INFO: Gagal menemukan skenario batal klaim yang valid');
             }
         }, 30000);
     });
@@ -157,12 +150,9 @@ describe('SYSTEM TESTING: Mahasiswa Claim Management - End to End Scenarios', ()
                 );
 
                 if (claimButtons.length > 0) {
-                    console.log(`✓ PASS: Ditemukan ${claimButtons.length} tombol klaim pada halaman home`);
                 } else {
-                    console.log('ℹ INFO: Tidak ada laporan yang tersedia untuk diklaim saat ini');
                 }
             } catch (error) {
-                console.log('ℹ INFO: Gagal menemukan skenario klaim yang valid');
             }
         }, 30000);
 
@@ -179,12 +169,9 @@ describe('SYSTEM TESTING: Mahasiswa Claim Management - End to End Scenarios', ()
                 );
 
                 if (ownReportClaimButtons.length > 0) {
-                    console.log('⚠ WARNING: Tombol klaim ditemukan pada laporan sendiri (seharusnya tidak ada)');
                 } else {
-                    console.log('✓ PASS: Tidak ada tombol klaim pada laporan milik sendiri');
                 }
             } catch (error) {
-                console.log('✓ PASS: Sistem mencegah klaim laporan milik sendiri');
             }
         }, 30000);
     });
@@ -211,7 +198,6 @@ describe('SYSTEM TESTING: Mahasiswa Claim Management - End to End Scenarios', ()
                 bodyText.length > 100;
 
             expect(hasStatusIndicator).toBe(true);
-            console.log('✓ PASS: Halaman status pengajuan klaim dapat diakses dan menampilkan informasi');
         }, 30000);
 
         test('ST-CLAIM-MAH-007: Mahasiswa dapat melihat detail status klaim dengan informasi lengkap', async () => {
@@ -232,12 +218,9 @@ describe('SYSTEM TESTING: Mahasiswa Claim Management - End to End Scenarios', ()
 
                     const updatedBodyText = await driver.findElement(By.tagName('body')).getText();
                     expect(updatedBodyText.length).toBeGreaterThan(0);
-                    console.log('✓ PASS: Detail status klaim menampilkan informasi');
                 } else {
-                    console.log('ℹ INFO: Tidak ada klaim untuk dilihat detailnya');
                 }
             } catch (error) {
-                console.log('ℹ INFO: Gagal melihat detail status klaim');
             }
         }, 30000);
     });
@@ -257,7 +240,6 @@ describe('SYSTEM TESTING: Mahasiswa Claim Management - End to End Scenarios', ()
             const bodyText = await driver.findElement(By.tagName('body')).getText();
             expect(bodyText.length).toBeGreaterThan(0);
 
-            console.log('✓ PASS: Mahasiswa dapat melihat halaman my-reports');
         }, 20000);
 
         test('ST-CLAIM-MAH-009: Mahasiswa dapat melihat detail klaim sebelum menerimanya', async () => {
@@ -270,7 +252,6 @@ describe('SYSTEM TESTING: Mahasiswa Claim Management - End to End Scenarios', ()
                 );
 
                 if (!detailButtons.length) {
-                    console.log("⚠ SKIP: Tidak ada laporan dengan klaim yang masuk");
                     return;
                 }
 
@@ -287,9 +268,7 @@ describe('SYSTEM TESTING: Mahasiswa Claim Management - End to End Scenarios', ()
                 const modalText = await modal.getText();
                 expect(modalText.length).toBeGreaterThan(0);
 
-                console.log('✓ PASS: Detail klaim dapat ditampilkan');
             } catch (error) {
-                console.log('⚠ SKIP: Tidak ada klaim untuk dilihat detailnya');
             }
         }, 20000);
 
@@ -303,7 +282,6 @@ describe('SYSTEM TESTING: Mahasiswa Claim Management - End to End Scenarios', ()
                 );
 
                 if (!acceptButtons.length) {
-                    console.log("⚠ SKIP: Tidak ada klaim yang menunggu persetujuan");
                     return;
                 }
 
@@ -324,7 +302,6 @@ describe('SYSTEM TESTING: Mahasiswa Claim Management - End to End Scenarios', ()
                     );
                     await catatanInput.sendKeys('Barang telah diserahkan kepada pemilik dengan kondisi baik.');
                 } catch (e) {
-                    console.log('Field catatan tidak ditemukan, melanjutkan tanpa catatan...');
                 }
 
                 const submitButton = await driver.findElement(
@@ -340,16 +317,12 @@ describe('SYSTEM TESTING: Mahasiswa Claim Management - End to End Scenarios', ()
                     await driver.executeScript("arguments[0].click();", swalOkBtn);
                     await driver.sleep(1000);
                 } catch (e) {
-                    console.log('Tidak ada SweetAlert, melanjutkan...');
                 }
 
                 const currentUrl = await driver.getCurrentUrl();
                 expect(currentUrl).toContain('/mahasiswa/my-reports');
 
-                console.log("✓ PASS: Mahasiswa berhasil menerima klaim dengan bukti serah terima");
             } catch (error) {
-                console.log("⚠ SKIP: Tidak dapat menyelesaikan proses menerima klaim");
-                console.log("Error:", error.message);
             }
         }, 45000);
 
@@ -366,9 +339,7 @@ describe('SYSTEM TESTING: Mahasiswa Claim Management - End to End Scenarios', ()
 
                 expect(bodyText.length).toBeGreaterThan(0);
 
-                console.log('✓ PASS: Status laporan dapat ditampilkan setelah klaim diterima');
             } catch (error) {
-                console.log('⚠ SKIP: Tidak dapat memverifikasi perubahan status');
             }
         }, 20000);
     });
@@ -390,7 +361,6 @@ describe('SYSTEM TESTING: Mahasiswa Claim Management - End to End Scenarios', ()
                 const rejectButtons = await driver.findElements(rejectBtnSelector);
 
                 if (!rejectButtons.length) {
-                    console.log("⚠ SKIP: Tidak ada klaim yang dapat ditolak");
                     return;
                 }
 
@@ -427,10 +397,8 @@ describe('SYSTEM TESTING: Mahasiswa Claim Management - End to End Scenarios', ()
                         const swalOkBtn = await driver.findElement(By.css('.swal2-confirm'));
                         await driver.executeScript("arguments[0].click();", swalOkBtn);
                     } catch (e) {
-                        console.log('Tidak ada success alert');
                     }
                 } catch (e) {
-                    console.log('Tidak ada konfirmasi SweetAlert, melanjutkan...');
                 }
 
                 await driver.sleep(2000);
@@ -438,10 +406,7 @@ describe('SYSTEM TESTING: Mahasiswa Claim Management - End to End Scenarios', ()
                 const currentUrl = await driver.getCurrentUrl();
                 expect(currentUrl).toContain('/mahasiswa/my-reports');
 
-                console.log("✓ PASS: Mahasiswa berhasil menolak klaim dengan alasan");
             } catch (error) {
-                console.log("⚠ SKIP: Tidak dapat menyelesaikan proses menolak klaim");
-                console.log("Error:", error.message);
             }
         }, 45000);
 
@@ -458,9 +423,7 @@ describe('SYSTEM TESTING: Mahasiswa Claim Management - End to End Scenarios', ()
 
                 expect(bodyText.length).toBeGreaterThan(0);
 
-                console.log('✓ PASS: Status klaim ditolak dapat ditampilkan');
             } catch (error) {
-                console.log('⚠ SKIP: Tidak dapat memverifikasi status penolakan');
             }
         }, 20000);
 
@@ -485,12 +448,9 @@ describe('SYSTEM TESTING: Mahasiswa Claim Management - End to End Scenarios', ()
                     const modalText = await modal.getText();
                     expect(modalText.length).toBeGreaterThan(0);
 
-                    console.log('✓ PASS: Detail laporan dengan alasan penolakan dapat ditampilkan');
                 } else {
-                    console.log('⚠ SKIP: Tidak ada detail untuk dilihat');
                 }
             } catch (error) {
-                console.log('⚠ SKIP: Tidak dapat melihat alasan penolakan');
             }
         }, 25000);
     });
@@ -510,7 +470,6 @@ describe('SYSTEM TESTING: Mahasiswa Claim Management - End to End Scenarios', ()
                 );
 
                 if (!acceptButtons.length) {
-                    console.log("⚠ SKIP: Tidak ada klaim untuk validasi");
                     return;
                 }
 
@@ -528,9 +487,7 @@ describe('SYSTEM TESTING: Mahasiswa Claim Management - End to End Scenarios', ()
                     bodyText.includes('required') ||
                     bodyText.includes('harus');
 
-                console.log('✓ PASS: Validasi bukti serah terima bekerja');
             } catch (error) {
-                console.log('⚠ SKIP: Tidak dapat melakukan validasi form accept');
             }
         }, 25000);
 
@@ -544,7 +501,6 @@ describe('SYSTEM TESTING: Mahasiswa Claim Management - End to End Scenarios', ()
                 );
 
                 if (!rejectButtons.length) {
-                    console.log("⚠ SKIP: Tidak ada klaim untuk validasi");
                     return;
                 }
 
@@ -562,9 +518,7 @@ describe('SYSTEM TESTING: Mahasiswa Claim Management - End to End Scenarios', ()
                     bodyText.includes('required') ||
                     bodyText.includes('harus');
 
-                console.log('✓ PASS: Validasi alasan penolakan bekerja');
             } catch (error) {
-                console.log('⚠ SKIP: Tidak dapat melakukan validasi form reject');
             }
         }, 25000);
     });

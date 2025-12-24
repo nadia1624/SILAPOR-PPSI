@@ -47,7 +47,6 @@ const logout = async (driver) => {
         await logoutBtn.click();
         await driver.sleep(1000);
     } catch (error) {
-        console.log('Logout via direct navigation');
         await driver.get(`${BASE_URL}/logout`);
     }
 };
@@ -75,7 +74,6 @@ const createTestReport = async (driver) => {
         const fileInput = await driver.findElement(By.css('input[type="file"]'));
         await fileInput.sendKeys(DUMMY_IMG_PATH);
     } catch (e) {
-        console.log('File input tidak ditemukan, melanjutkan tanpa upload foto');
     }
 
     // Submit form
@@ -141,16 +139,7 @@ describe('SYSTEM TESTING: Email & Realtime Notification', () => {
                 // Catatan: Email akan dikirim ke sisteminformasiunand23@gmail.com
                 // Verifikasi email harus dilakukan secara manual atau dengan email testing service
                 
-                console.log('✓ PASS: Laporan berhasil dibuat, email notification terkirim ke admin');
-                console.log('📧 Email dikirim ke: sisteminformasiunand23@gmail.com');
-                console.log('📋 Email berisi:');
-                console.log('   - Jenis Laporan: Kehilangan');
-                console.log('   - Nama Barang: Testing Notifikasi - Laptop HP');
-                console.log('   - Lokasi: Fakultas Teknik Unand');
-                console.log('   - Pelapor: nadyadearihanifah@gmail.com');
             } catch (error) {
-                console.log('⚠ SKIP: Gagal membuat laporan untuk test email');
-                console.log('Error:', error.message);
             }
 
             await logout(driver);
@@ -176,16 +165,7 @@ describe('SYSTEM TESTING: Email & Realtime Notification', () => {
                 const currentUrl = await driver.getCurrentUrl();
                 expect(currentUrl).toContain('/mahasiswa/my-reports');
                 
-                console.log('✓ PASS: Email notification berisi detail lengkap laporan');
-                console.log('📋 Detail yang dikirim dalam email:');
-                console.log('   ✓ Jenis Laporan: Kehilangan');
-                console.log('   ✓ Nama Barang: Testing Notifikasi - Laptop HP');
-                console.log('   ✓ Lokasi: Fakultas Teknik Unand');
-                console.log('   ✓ Tanggal Kejadian');
-                console.log('   ✓ Deskripsi');
-                console.log('   ✓ Email Pelapor: nadyadearihanifah@gmail.com');
             } catch (error) {
-                console.log('⚠ SKIP: Gagal membuat laporan untuk verifikasi email detail');
             }
 
             await logout(driver);
@@ -222,11 +202,7 @@ describe('SYSTEM TESTING: Email & Realtime Notification', () => {
                 const currentUrl = await driver.getCurrentUrl();
                 expect(currentUrl).toContain('/admin/my-reports');
 
-                console.log('✓ PASS: Laporan admin dibuat tanpa email notification');
-                console.log('📝 Status laporan: On Progress (langsung)');
-                console.log('📧 Email notification: TIDAK dikirim');
             } catch (error) {
-                console.log('⚠ SKIP: Gagal membuat laporan admin');
             }
 
             await logout(driver);
@@ -255,7 +231,6 @@ describe('SYSTEM TESTING: Email & Realtime Notification', () => {
                 window.showNotification = function(title, message, time) {
                     window.testNotificationReceived = true;
                     window.testNotificationData = { title, message, time };
-                    console.log('Notification captured:', { title, message, time });
                     if (originalShowNotification) {
                         originalShowNotification(title, message, time);
                     }
@@ -282,19 +257,10 @@ describe('SYSTEM TESTING: Email & Realtime Notification', () => {
                 );
 
                 if (notifReceived && notifData) {
-                    console.log('✓ PASS: Admin menerima notifikasi realtime');
-                    console.log('📨 Notification received:');
-                    console.log('   - Title:', notifData.title);
-                    console.log('   - Message:', notifData.message);
-                    console.log('   - Time:', notifData.time);
                     expect(notifReceived).toBe(true);
                 } else {
-                    console.log('⚠ PARTIAL: Laporan dibuat tapi notifikasi tidak terdeteksi di test');
-                    console.log('💡 Catatan: Notifikasi mungkin tetap terkirim, cek console browser');
                 }
             } catch (error) {
-                console.log('⚠ SKIP: Gagal test realtime notification');
-                console.log('Error:', error.message);
             }
 
             await logout(driver);
@@ -329,19 +295,11 @@ describe('SYSTEM TESTING: Email & Realtime Notification', () => {
 
                     if (notifElements.length > 0) {
                         const containerText = await notifContainer[0].getText();
-                        console.log('✓ PASS: Notifikasi popup muncul di sidebar admin');
-                        console.log('📢 Jumlah notifikasi aktif:', notifElements.length);
-                        console.log('📝 Isi notifikasi:', containerText.substring(0, 100) + '...');
                     } else {
-                        console.log('⚠ PARTIAL: Container ada tapi notifikasi tidak muncul');
-                        console.log('💡 Mungkin notifikasi sudah auto-dismiss');
                     }
                 } else {
-                    console.log('⚠ SKIP: Notifikasi container tidak ditemukan');
                 }
             } catch (error) {
-                console.log('⚠ SKIP: Gagal verifikasi notifikasi popup');
-                console.log('Error:', error.message);
             }
 
             await logout(driver);
@@ -371,8 +329,6 @@ describe('SYSTEM TESTING: Email & Realtime Notification', () => {
                 const initialCount = notifElements.length;
 
                 if (initialCount > 0) {
-                    console.log(`📢 Notifikasi muncul: ${initialCount} notification(s)`);
-                    
                     // THEN: Tunggu 6 detik untuk auto-dismiss (total 9 detik dari submit)
                     await adminDriver.sleep(6000);
 
@@ -383,19 +339,11 @@ describe('SYSTEM TESTING: Email & Realtime Notification', () => {
                     const finalCount = notifElements.length;
 
                     if (finalCount < initialCount) {
-                        console.log('✓ PASS: Notifikasi auto-dismiss setelah 5 detik');
-                        console.log(`📊 Notifikasi sebelum: ${initialCount}, setelah: ${finalCount}`);
                     } else {
-                        console.log('⚠ PARTIAL: Notifikasi masih ada setelah 5 detik');
-                        console.log('💡 Mungkin auto-dismiss memerlukan waktu lebih lama');
                     }
                 } else {
-                    console.log('⚠ SKIP: Tidak ada notifikasi untuk test auto-dismiss');
-                    console.log('💡 Notifikasi mungkin sudah dismiss sebelum test check');
                 }
             } catch (error) {
-                console.log('⚠ SKIP: Gagal test auto-dismiss');
-                console.log('Error:', error.message);
             }
 
             await logout(driver);
@@ -419,15 +367,9 @@ describe('SYSTEM TESTING: Email & Realtime Notification', () => {
                 `);
 
                 if (socketConnected) {
-                    console.log('✓ PASS: Socket.IO connection established');
-                    console.log('🔌 Socket ID:', socketId);
-                    console.log('📡 Socket dapat menerima event broadcast dari server');
                 } else {
-                    console.log('⚠ PARTIAL: Socket.IO library tersedia tapi connection belum establish');
                 }
             } catch (error) {
-                console.log('⚠ SKIP: Gagal verifikasi Socket.IO connection');
-                console.log('Error:', error.message);
             }
 
             await logout(adminDriver);

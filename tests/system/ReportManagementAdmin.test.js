@@ -43,7 +43,6 @@ const logout = async (driver) => {
         await logoutBtn.click();
         await driver.sleep(1000);
     } catch (error) {
-        console.log('Logout via direct navigation');
         await driver.get(`${BASE_URL}/logout`);
     }
 };
@@ -123,7 +122,6 @@ describe('SYSTEM TESTING: Admin Report Management - End to End Scenarios', () =>
             const bodyText = await driver.findElement(By.tagName('body')).getText();
             expect(bodyText.length).toBeGreaterThan(0);
 
-            console.log('✓ PASS: Admin dapat melihat halaman laporan');
         }, 20000);
 
         test('ST-002: Admin dapat melihat detail lengkap suatu laporan', async () => {
@@ -151,9 +149,7 @@ describe('SYSTEM TESTING: Admin Report Management - End to End Scenarios', () =>
                 const modalText = await modal.getText();
                 expect(modalText.length).toBeGreaterThan(0);
 
-                console.log('✓ PASS: Detail laporan dapat ditampilkan');
             } catch (error) {
-                console.log('⚠ SKIP: Tidak ada laporan untuk dilihat detailnya');
             }
         }, 20000);
     });
@@ -172,7 +168,6 @@ describe('SYSTEM TESTING: Admin Report Management - End to End Scenarios', () =>
                 );
 
                 if (!acceptButtons.length) {
-                    console.log("⚠ SKIP: Tidak ada laporan dalam status klaim menunggu approval");
                     return;
                 }
 
@@ -193,10 +188,7 @@ describe('SYSTEM TESTING: Admin Report Management - End to End Scenarios', () =>
                 const pageText = await driver.findElement(By.tagName('body')).getText();
                 expect(pageText).not.toContain('Waiting for approval');
 
-                console.log("✓ PASS: Admin berhasil menerima klaim laporan");
             } catch (error) {
-                console.log("⚠ SKIP: Tidak dapat menyelesaikan proses menerima klaim");
-                console.log("Error:", error.message);
             }
         }, 40000);
     });
@@ -243,10 +235,7 @@ describe('SYSTEM TESTING: Admin Report Management - End to End Scenarios', () =>
                 const bodyText = await driver.findElement(By.tagName('body')).getText();
                 expect(bodyText).toMatch(/Ditolak|Rejected/);
 
-                console.log("✓ PASS: Admin berhasil menolak klaim dengan alasan");
             } catch (error) {
-                console.log("⚠ SKIP: Tidak dapat menyelesaikan proses menolak klaim");
-                console.log("Error:", error.message);
             }
         }, 40000);
     });
@@ -257,11 +246,9 @@ describe('SYSTEM TESTING: Admin Report Management - End to End Scenarios', () =>
     describe('SKENARIO 4: Admin Membuat Laporan Baru', () => {
         test('ST-ADMIN-CREATE-001: Admin sukses membuat laporan dan status On Progress', async () => {
             // PERBAIKAN: Ubah Navigasi ke '/admin/dashboard' sesuai screenshot
-            console.log('   - [Step 1] Mengakses Dashboard Admin...');
             await driver.get(`${BASE_URL}/admin/dashboard`);
             await driver.wait(until.urlContains('/admin'), 10000);
 
-            console.log('   - [Step 2] Menekan tombol Buat Laporan...');
             try {
                 // Mencari tombol "Buat Laporan Baru" (Tombol Putih di Banner Hijau)
                 // XPath ini mencari link (<a>) atau button (<button>) yang berisi teks 'Buat Laporan Baru'
@@ -271,21 +258,17 @@ describe('SYSTEM TESTING: Admin Report Management - End to End Scenarios', () =>
                 );
                 await driver.executeScript("arguments[0].click();", createBtn);
             } catch (e) {
-                console.log('     Tombol tidak ditemukan di Dashboard, mencoba akses URL langsung...');
                 await driver.get(`${BASE_URL}/admin/report/create`);
             }
 
             await driver.wait(until.elementLocated(By.name('nama_barang')), TIMEOUT);
 
-            console.log('   - Mengisi data laporan...');
             const jenisSelect = await driver.findElement(By.name('jenis_laporan'));
             await jenisSelect.sendKeys('Kehilangan');
             await driver.findElement(By.name('nama_barang')).sendKeys(TEST_REPORT.nama_barang);
             await driver.findElement(By.name('lokasi_kejadian')).sendKeys(TEST_REPORT.lokasi);
             await driver.findElement(By.name('tanggal_kejadian')).sendKeys(TEST_REPORT.tanggal_kejadian);
             await driver.findElement(By.name('deskripsi')).sendKeys(TEST_REPORT.deskripsi);
-
-            console.log('   - Upload bukti foto...');
 
             const filePath = path.resolve(__dirname, 'admin_bukti.jpg');
             if (!fs.existsSync(filePath)) {
@@ -294,23 +277,19 @@ describe('SYSTEM TESTING: Admin Report Management - End to End Scenarios', () =>
             const fileInput = await driver.findElement(By.css('input[type="file"]'));
             await fileInput.sendKeys(filePath);
 
-            console.log('   - Mengirim laporan...');
             const submitBtn = await driver.findElement(By.css('button[type="submit"]'));
             await driver.executeScript("arguments[0].scrollIntoView(true);", submitBtn);
             await driver.sleep(500);
             await submitBtn.click();
 
-            console.log('   - Verifikasi hasil...');
             await driver.wait(until.urlContains('/admin/my-reports'), TIMEOUT);
             const pageSource = await driver.getPageSource();
             expect(pageSource.includes(TEST_REPORT.nama_barang)).toBe(true);
             const isStatusCorrect = pageSource.includes('On progress');
 
             if (!isStatusCorrect) {
-                console.log('WARNING: Status "On progress" tidak ditemukan pada halaman Laporan Saya.');
             }
             expect(isStatusCorrect).toBe(true);
-            console.log('✓ PASS: Admin sukses membuat laporan & status On progress valid');
         }, 40000);
     });
 
@@ -329,7 +308,6 @@ describe('SYSTEM TESTING: Admin Report Management - End to End Scenarios', () =>
             const bodyText = await driver.findElement(By.tagName('body')).getText();
             expect(bodyText.length).toBeGreaterThan(0);
 
-            console.log('✓ PASS: Admin dapat membuka halaman laporan untuk melihat klaim');
         }, 20000);
 
         test('ST-VERIF-CLAIM-002: Admin dapat melihat daftar laporan dengan status klaim', async () => {
@@ -342,12 +320,9 @@ describe('SYSTEM TESTING: Admin Report Management - End to End Scenarios', () =>
                 );
 
                 if (claimIndicators.length > 0) {
-                    console.log(`✓ PASS: Ditemukan ${claimIndicators.length} indikator status klaim pada halaman`);
                 } else {
-                    console.log('⚠ INFO: Tidak ada laporan dengan status klaim saat ini');
                 }
             } catch (error) {
-                console.log('⚠ SKIP: Gagal mencari indikator klaim');
             }
         }, 25000);
 
@@ -361,7 +336,6 @@ describe('SYSTEM TESTING: Admin Report Management - End to End Scenarios', () =>
                 );
 
                 if (!acceptButtons.length) {
-                    console.log('⚠ SKIP: Tidak ada klaim yang menunggu persetujuan');
                     return;
                 }
 
@@ -373,12 +347,9 @@ describe('SYSTEM TESTING: Admin Report Management - End to End Scenarios', () =>
                 );
 
                 if (formElements.length > 0) {
-                    console.log('✓ PASS: Form penyerahan bukti klaim tersedia');
                 } else {
-                    console.log('⚠ INFO: Form tidak terdeteksi, mungkin menggunakan modal atau flow berbeda');
                 }
             } catch (error) {
-                console.log('⚠ SKIP: Gagal menemukan skenario accept claim');
             }
         }, 35000);
 
@@ -392,7 +363,6 @@ describe('SYSTEM TESTING: Admin Report Management - End to End Scenarios', () =>
                 );
 
                 if (!rejectButtons.length) {
-                    console.log('⚠ SKIP: Tidak ada klaim yang dapat ditolak');
                     return;
                 }
 
@@ -404,17 +374,13 @@ describe('SYSTEM TESTING: Admin Report Management - End to End Scenarios', () =>
                 );
 
                 if (alasanElements.length > 0) {
-                    console.log('✓ PASS: Form alasan penolakan tersedia');
                 } else {
                     const swalPopup = await driver.findElements(By.css('.swal2-popup'));
                     if (swalPopup.length > 0) {
-                        console.log('✓ PASS: Modal konfirmasi penolakan tersedia');
                     } else {
-                        console.log('⚠ INFO: Elemen alasan tidak terdeteksi');
                     }
                 }
             } catch (error) {
-                console.log('⚠ SKIP: Gagal menemukan skenario reject claim');
             }
         }, 35000);
     });
@@ -446,9 +412,7 @@ describe('SYSTEM TESTING: Admin Report Management - End to End Scenarios', () =>
             );
 
             if (foundStatuses.length > 0) {
-                console.log(`✓ PASS: Ditemukan status: ${foundStatuses.join(', ')}`);
             } else {
-                console.log('⚠ INFO: Tidak ada status yang terdeteksi (mungkin tidak ada laporan)');
             }
         }, 20000);
 
@@ -462,7 +426,6 @@ describe('SYSTEM TESTING: Admin Report Management - End to End Scenarios', () =>
                 );
 
                 if (!detailButtons.length) {
-                    console.log('⚠ SKIP: Tidak ada laporan untuk dilihat detailnya');
                     return;
                 }
 
@@ -478,12 +441,9 @@ describe('SYSTEM TESTING: Admin Report Management - End to End Scenarios', () =>
                     bodyText.includes('Done');
 
                 if (hasStatusInfo) {
-                    console.log('✓ PASS: Detail laporan menampilkan informasi status');
                 } else {
-                    console.log('⚠ INFO: Status tidak terdeteksi pada detail modal');
                 }
             } catch (error) {
-                console.log('⚠ SKIP: Gagal melihat detail laporan');
             }
         }, 30000);
     });

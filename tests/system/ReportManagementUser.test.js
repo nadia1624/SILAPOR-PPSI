@@ -42,7 +42,6 @@ const logout = async (driver) => {
         await logoutBtn.click();
         await driver.sleep(1000);
     } catch (error) {
-        console.log('Logout via direct navigation');
         await driver.get(`${BASE_URL}/logout`);
     }
 };
@@ -130,7 +129,6 @@ describe('SYSTEM TESTING: Mahasiswa Report Management - End to End Scenarios', (
             const bodyText = await driver.findElement(By.tagName('body')).getText();
             expect(bodyText.length).toBeGreaterThan(0);
 
-            console.log('✓ PASS: Mahasiswa dapat melihat halaman laporan');
         }, 20000);
 
         test('ST-MAH-002: Mahasiswa dapat melihat detail lengkap suatu laporan', async () => {
@@ -158,9 +156,7 @@ describe('SYSTEM TESTING: Mahasiswa Report Management - End to End Scenarios', (
                 const modalText = await modal.getText();
                 expect(modalText.length).toBeGreaterThan(0);
 
-                console.log('✓ PASS: Detail laporan dapat ditampilkan');
             } catch (error) {
-                console.log('⚠ SKIP: Tidak ada laporan untuk dilihat detailnya');
             }
         }, 20000);
     });

@@ -78,7 +78,6 @@ describe('SYSTEM TESTING: Riwayat Laporan Selesai (Admin)', () => {
             const detailPage = await driver.findElement(By.tagName('body')).getText();
             expect(detailPage).toContain('Detail');
         } else {
-            console.log("⚠️ Tidak ada data laporan untuk dites (skipping UC-HISTORY-002)");
         }
     }, 25000);
 
@@ -91,9 +90,7 @@ describe('SYSTEM TESTING: Riwayat Laporan Selesai (Admin)', () => {
         const downloadButtons = await driver.findElements(By.xpath("//button[contains(text(),'Download')]"));
         if (downloadButtons.length > 0) {
             await downloadButtons[0].click();
-            console.log("📄 Download PDF button clicked (tidak bisa verifikasi file via Selenium)");
         } else {
-            console.log("⚠️ Tidak ada file PDF yang bisa di-download (skipping test)");
         }
     }, 20000);
 });

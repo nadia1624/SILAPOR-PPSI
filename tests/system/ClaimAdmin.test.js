@@ -64,7 +64,6 @@ describe('SYSTEM TESTING: Admin Claim Management - End to End Scenarios', () => 
             const hasContent = bodyText.includes('Laporan Diklaim') || bodyText.includes('Klaim');
             expect(hasContent || bodyText.length > 0).toBe(true);
 
-            console.log('✓ PASS: Admin dapat membuka halaman Klaim Saya');
         }, 30000);
 
         test('ST-CLAIM-ADMIN-002: Admin dapat melihat detail laporan klaim', async () => {
@@ -77,7 +76,6 @@ describe('SYSTEM TESTING: Admin Claim Management - End to End Scenarios', () => 
                 );
 
                 if (!detailButtons.length) {
-                    console.log('ℹ INFO: Tidak ada klaim admin untuk dilihat detailnya');
                     return;
                 }
 
@@ -87,9 +85,7 @@ describe('SYSTEM TESTING: Admin Claim Management - End to End Scenarios', () => 
                 const bodyText = await driver.findElement(By.tagName('body')).getText();
                 expect(bodyText.length).toBeGreaterThan(0);
 
-                console.log('✓ PASS: Detail laporan klaim admin dapat ditampilkan');
             } catch (error) {
-                console.log('ℹ INFO: Tidak ada klaim untuk dilihat detailnya');
             }
         }, 30000);
 
@@ -103,7 +99,6 @@ describe('SYSTEM TESTING: Admin Claim Management - End to End Scenarios', () => 
                 );
 
                 if (!cancelButtons.length) {
-                    console.log('ℹ INFO: Tidak ada klaim admin dengan status "Waiting for approval" untuk dibatalkan');
                     return;
                 }
 
@@ -113,9 +108,7 @@ describe('SYSTEM TESTING: Admin Claim Management - End to End Scenarios', () => 
                 const bodyText = await driver.findElement(By.tagName('body')).getText();
                 expect(bodyText.length).toBeGreaterThan(0);
 
-                console.log('✓ PASS: Admin dapat membatalkan klaim');
             } catch (error) {
-                console.log('ℹ INFO: Gagal menemukan skenario batal klaim admin yang valid');
             }
         }, 30000);
     });
@@ -131,7 +124,6 @@ describe('SYSTEM TESTING: Admin Claim Management - End to End Scenarios', () => 
             const bodyText = await driver.findElement(By.tagName('body')).getText();
             expect(bodyText.length).toBeGreaterThan(0);
 
-            console.log('✓ PASS: Admin dapat membuka halaman untuk melihat laporan dan klaim yang masuk');
         }, 30000);
 
         test('ST-CLAIM-ADMIN-005: Admin dapat melihat daftar klaim yang menunggu persetujuan', async () => {
@@ -148,7 +140,6 @@ describe('SYSTEM TESTING: Admin Claim Management - End to End Scenarios', () => 
                 bodyText.length > 100;
 
             expect(hasClaimIndicator).toBe(true);
-            console.log('✓ PASS: Halaman menampilkan daftar laporan dengan status');
         }, 30000);
 
         test('ST-CLAIM-ADMIN-006: Admin dapat melihat detail klaim yang masuk sebelum memproses', async () => {
@@ -161,7 +152,6 @@ describe('SYSTEM TESTING: Admin Claim Management - End to End Scenarios', () => 
                 );
 
                 if (!detailButtons.length) {
-                    console.log('ℹ INFO: Tidak ada laporan untuk dilihat detailnya');
                     return;
                 }
 
@@ -171,9 +161,7 @@ describe('SYSTEM TESTING: Admin Claim Management - End to End Scenarios', () => 
                 const bodyText = await driver.findElement(By.tagName('body')).getText();
                 expect(bodyText.length).toBeGreaterThan(0);
 
-                console.log('✓ PASS: Admin dapat melihat detail klaim yang masuk');
             } catch (error) {
-                console.log('ℹ INFO: Gagal melihat detail klaim');
             }
         }, 30000);
     });
@@ -189,7 +177,6 @@ describe('SYSTEM TESTING: Admin Claim Management - End to End Scenarios', () => 
                 );
 
                 if (!acceptButtons.length) {
-                    console.log('ℹ INFO: Tidak ada klaim yang menunggu persetujuan untuk disetujui');
                     const bodyText = await driver.findElement(By.tagName('body')).getText();
                     expect(bodyText.length).toBeGreaterThan(0);
                     return;
@@ -200,9 +187,7 @@ describe('SYSTEM TESTING: Admin Claim Management - End to End Scenarios', () => 
 
                 const bodyText = await driver.findElement(By.tagName('body')).getText();
                 expect(bodyText.length).toBeGreaterThan(0);
-                console.log('✓ PASS: Admin dapat mengakses form persetujuan klaim');
             } catch (error) {
-                console.log('ℹ INFO: Gagal menemukan skenario accept claim yang valid');
             }
         }, 45000);
     });
@@ -218,7 +203,6 @@ describe('SYSTEM TESTING: Admin Claim Management - End to End Scenarios', () => 
                 );
 
                 if (!rejectButtons.length) {
-                    console.log('ℹ INFO: Tidak ada klaim yang dapat ditolak');
                     const bodyText = await driver.findElement(By.tagName('body')).getText();
                     expect(bodyText.length).toBeGreaterThan(0);
                     return;
@@ -229,9 +213,7 @@ describe('SYSTEM TESTING: Admin Claim Management - End to End Scenarios', () => 
 
                 const bodyText = await driver.findElement(By.tagName('body')).getText();
                 expect(bodyText.length).toBeGreaterThan(0);
-                console.log('✓ PASS: Admin dapat mengakses form penolakan klaim');
             } catch (error) {
-                console.log('ℹ INFO: Gagal menemukan skenario reject claim yang valid');
             }
         }, 45000);
 
@@ -248,12 +230,9 @@ describe('SYSTEM TESTING: Admin Claim Management - End to End Scenarios', () => 
                 );
 
                 if (rejectButtons.length > 0) {
-                    console.log('✓ PASS: Tombol untuk menolak klaim tersedia');
                 } else {
-                    console.log('ℹ INFO: Tidak ada tombol tolak (mungkin tidak ada klaim pending)');
                 }
             } catch (error) {
-                console.log('ℹ INFO: Gagal menemukan mekanisme konfirmasi');
             }
         }, 30000);
     });
@@ -275,7 +254,6 @@ describe('SYSTEM TESTING: Admin Claim Management - End to End Scenarios', () => 
                 bodyText.length > 100;
 
             expect(hasStatusIndicator).toBe(true);
-            console.log('✓ PASS: Halaman menampilkan status pengajuan laporan');
         }, 30000);
 
         test('ST-CLAIM-ADMIN-011: Admin dapat memfilter laporan berdasarkan status', async () => {
@@ -291,12 +269,9 @@ describe('SYSTEM TESTING: Admin Claim Management - End to End Scenarios', () => 
                 );
 
                 if (filterElements.length > 0) {
-                    console.log('✓ PASS: Elemen filter tersedia pada halaman');
                 } else {
-                    console.log('✓ PASS: Halaman menampilkan laporan (filter mungkin built-in atau via tab)');
                 }
             } catch (error) {
-                console.log('ℹ INFO: Gagal menemukan elemen filter');
             }
         }, 30000);
     });

@@ -1,14 +1,14 @@
 const { Builder, By, until, Select } = require('selenium-webdriver');
 const chrome = require('selenium-webdriver/chrome');
 const { ServiceBuilder } = require('selenium-webdriver/chrome');
-const chromedriver = require('chromedriver'); 
+const chromedriver = require('chromedriver');
 const assert = require('assert');
 
-const BASE_URL = process.env.BASE_URL || 'http://localhost:3000'; 
-const TIMEOUT = 15000; 
+const BASE_URL = process.env.BASE_URL || 'http://localhost:3000';
+const TIMEOUT = 15000;
 
-const ADMIN_EMAIL = 'admin@silapor.com'; 
-const ADMIN_PASSWORD = 'admin123'; 
+const ADMIN_EMAIL = 'admin@silapor.com';
+const ADMIN_PASSWORD = 'admin123';
 
 // Data User Test
 const timestamp = Date.now();
@@ -23,7 +23,7 @@ describe('SYSTEM TESTING: User Management & Admin Profile', () => {
     let driver;
 
     beforeAll(async () => {
-        const service = new ServiceBuilder(chromedriver.path); 
+        const service = new ServiceBuilder(chromedriver.path);
         const options = new chrome.Options();
         options.addArguments('--headless=new', '--no-sandbox', '--disable-dev-shm-usage', '--window-size=1920,1080');
 
@@ -32,7 +32,7 @@ describe('SYSTEM TESTING: User Management & Admin Profile', () => {
             .setChromeService(service)
             .setChromeOptions(options)
             .build();
-    }, 45000); 
+    }, 45000);
 
     afterAll(async () => {
         if (driver) await driver.quit();
@@ -96,6 +96,11 @@ describe('SYSTEM TESTING: User Management & Admin Profile', () => {
 
             await driver.findElement(By.xpath('//div[@id="editUserModal"]//button[text()="Simpan Perubahan"]')).click();
             await driver.wait(until.urlIs(`${BASE_URL}/admin/userList`), 10000);
+            await driver.sleep(1000);
+
+            // Re-navigate to refresh the page and avoid stale element
+            await driver.get(`${BASE_URL}/admin/userList`);
+            await driver.wait(until.elementLocated(By.xpath(`//td[text()='${NEW_USER_EMAIL}']`)), 5000);
 
             const updatedRowText = await driver.findElement(By.xpath(`//td[text()='${NEW_USER_EMAIL}']/ancestor::tr`)).getText();
             expect(updatedRowText).toContain(UPDATED_USER_NAME);
@@ -135,7 +140,7 @@ describe('SYSTEM TESTING: User Management & Admin Profile', () => {
 
             await driver.findElement(By.xpath('//div[@id="createUserModal"]//button[text()="Simpan User"]')).click();
 
-            const alertText = await driver.switchTo().alert().getText().catch(() => null); 
+            const alertText = await driver.switchTo().alert().getText().catch(() => null);
             expect(alertText).toBeNull(); // SweetAlert2 handled in DOM, tidak alert native
             const errorElement = await driver.findElement(By.css('.swal2-title')).getText();
             expect(errorElement).toContain('Password Tidak Sama');

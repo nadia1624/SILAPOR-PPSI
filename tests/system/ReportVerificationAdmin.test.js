@@ -26,7 +26,6 @@ const logout = async (driver) => {
         await logoutBtn.click();
         await driver.sleep(1000);
     } catch (error) {
-        console.log('Logout via direct navigation');
         await driver.get(`${BASE_URL}/logout`);
     }
 };
@@ -75,7 +74,6 @@ describe('SYSTEM TESTING: Admin Report Verification - End to End Scenarios', () 
             ).getText();
             expect(heading.length).toBeGreaterThan(0);
 
-            console.log('✓ PASS: Admin dapat membuka halaman Verifikasi Laporan');
         }, 20000);
 
         test('ST-VERIF-ADMIN-002: Admin dapat melihat detail laporan sebelum verifikasi', async () => {
@@ -99,9 +97,7 @@ describe('SYSTEM TESTING: Admin Report Verification - End to End Scenarios', () 
                 const modalText = await detailModal.getText();
                 expect(modalText.length).toBeGreaterThan(0);
 
-                console.log('✓ PASS: Detail laporan verifikasi dapat ditampilkan');
             } catch (error) {
-                console.log('⚠ SKIP: Tidak ada laporan yang menunggu verifikasi');
             }
         }, 25000);
     });
@@ -117,7 +113,6 @@ describe('SYSTEM TESTING: Admin Report Verification - End to End Scenarios', () 
                 );
 
                 if (!verifyButtons.length) {
-                    console.log('⚠ SKIP: Tidak ada laporan yang menunggu verifikasi untuk disetujui');
                     return;
                 }
 
@@ -143,9 +138,7 @@ describe('SYSTEM TESTING: Admin Report Verification - End to End Scenarios', () 
                 ).getText();
                 expect(heading.length).toBeGreaterThan(0);
 
-                console.log('✓ PASS: Admin dapat menyetujui verifikasi laporan');
             } catch (error) {
-                console.log('⚠ SKIP: Gagal menemukan skenario verifikasi approve yang valid');
             }
         }, 35000);
     });
@@ -161,7 +154,6 @@ describe('SYSTEM TESTING: Admin Report Verification - End to End Scenarios', () 
                 );
 
                 if (!verifyButtons.length) {
-                    console.log('⚠ SKIP: Tidak ada laporan yang menunggu verifikasi untuk ditolak');
                     return;
                 }
 
@@ -185,7 +177,6 @@ describe('SYSTEM TESTING: Admin Report Verification - End to End Scenarios', () 
                 );
 
                 if (!rejectModals.length) {
-                    console.log('⚠ SKIP: Modal tolak verifikasi tidak ditemukan');
                     return;
                 }
 
@@ -210,9 +201,7 @@ describe('SYSTEM TESTING: Admin Report Verification - End to End Scenarios', () 
                 ).getText();
                 expect(heading.length).toBeGreaterThan(0);
 
-                console.log('✓ PASS: Admin dapat menolak verifikasi laporan dengan alasan');
             } catch (error) {
-                console.log('⚠ SKIP: Gagal menemukan skenario verifikasi reject yang valid');
             }
         }, 40000);
     });
