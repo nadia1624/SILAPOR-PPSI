@@ -1,0 +1,20 @@
+2025-12-24 14:22:52,462 INFO o.a.j.u.JMeterUtils: Setting Locale to en_EN
+2025-12-24 14:22:52,473 INFO o.a.j.JMeter: Loading user properties from: C:\Program Files\apache-jmeter-5.6.3\bin\user.properties
+2025-12-24 14:22:52,473 INFO o.a.j.JMeter: Loading system properties from: C:\Program Files\apache-jmeter-5.6.3\bin\system.properties
+2025-12-24 14:22:52,478 INFO o.a.j.JMeter: Copyright (c) 1998-2024 The Apache Software Foundation
+2025-12-24 14:22:52,478 INFO o.a.j.JMeter: Version 5.6.3
+2025-12-24 14:22:52,478 INFO o.a.j.JMeter: java.version=24.0.1
+2025-12-24 14:22:52,478 INFO o.a.j.JMeter: java.vm.name=Java HotSpot(TM) 64-Bit Server VM
+2025-12-24 14:22:52,479 INFO o.a.j.JMeter: os.name=Windows 11
+2025-12-24 14:22:52,479 INFO o.a.j.JMeter: os.arch=amd64
+2025-12-24 14:22:52,479 INFO o.a.j.JMeter: os.version=10.0
+2025-12-24 14:22:52,479 INFO o.a.j.JMeter: file.encoding=UTF-8
+2025-12-24 14:22:52,479 INFO o.a.j.JMeter: java.awt.headless=null
+2025-12-24 14:22:52,479 INFO o.a.j.JMeter: Max memory     =1073741824
+2025-12-24 14:22:52,479 INFO o.a.j.JMeter: Available Processors =20
+2025-12-24 14:22:52,488 INFO o.a.j.JMeter: Default Locale=English (EN)
+2025-12-24 14:22:52,488 INFO o.a.j.JMeter: JMeter  Locale=English (EN)
+2025-12-24 14:22:52,488 INFO o.a.j.JMeter: JMeterHome=C:\Program Files\apache-jmeter-5.6.3
+2025-12-24 14:22:52,488 INFO o.a.j.JMeter: user.dir  =D:\User\Documents\Semua Tugas Besar\TB_PPSI\SILAPOR-PPSI\SILAPOR-PPSI
+2025-12-24 14:22:52,489 INFO o.a.j.JMeter: PWD       =D:\User\Documents\Semua Tugas Besar\TB_PPSI\SILAPOR-PPSI\SILAPOR-PPSI
+2025-12-24 14:22:52,490 INFO o.a.j.JMeter: IP: 10.205.194.53 Name: ALPHA-DSKTP1385 FullName: ALPHA-DSKTP1385
