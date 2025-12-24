@@ -54,7 +54,7 @@ describe("CheckRoleMiddleware - checkRole", () => {
     expect(res.status).not.toHaveBeenCalled();
     expect(res.json).not.toHaveBeenCalled();
   });
-
+    
   test("should return 403 if user role does not match required role", () => {
     const middleware = CheckRoleMiddleware.checkRole("admin");
     req.user = { role: "user" };
