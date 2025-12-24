@@ -21,6 +21,9 @@ describe('AuthController', () => {
         // Reset mocks before each test
         jest.clearAllMocks();
 
+        // Mock console.error to suppress error messages during tests
+        jest.spyOn(console, 'error').mockImplementation(() => { });
+
         // Mock Sequelize User model and its methods
         mockUser = {
             findOne: jest.fn(),
@@ -48,6 +51,10 @@ describe('AuthController', () => {
 
         // Instantiate the controller with the mocked model
         authController = new AuthController({ User: mockUser });
+    });
+
+    afterEach(() => {
+        console.error.mockRestore();
     });
 
     describe('register', () => {
@@ -466,9 +473,9 @@ describe('AuthController', () => {
 
             await authController.resetPassword(mockReq, mockRes);
 
-            expect(mockRes.render).toHaveBeenCalledWith('resetPassword', { 
-                token: 'validToken', 
-                error: 'Password harus minimal 8 karakter dan kombinasi huruf, angka, simbol.' 
+            expect(mockRes.render).toHaveBeenCalledWith('resetPassword', {
+                token: 'validToken',
+                error: 'Password harus minimal 8 karakter dan kombinasi huruf, angka, simbol.'
             });
         });
 
@@ -560,8 +567,8 @@ describe('AuthController', () => {
 
             await authController.changePassword(mockReq, mockRes);
 
-            expect(mockRes.render).toHaveBeenCalledWith('changePassword', { 
-                error: 'Password harus minimal 8 karakter dan kombinasi huruf, angka, simbol.' 
+            expect(mockRes.render).toHaveBeenCalledWith('changePassword', {
+                error: 'Password harus minimal 8 karakter dan kombinasi huruf, angka, simbol.'
             });
         });
 
@@ -610,9 +617,9 @@ describe('AuthController', () => {
             await authController.changePasswordAdmin(mockReq, mockRes);
 
             expect(mockUserInstance.save).toHaveBeenCalled();
-            expect(mockRes.render).toHaveBeenCalledWith('admin/changePasswordadmin', { 
-                success: 'Password berhasil diganti.', 
-                user: mockUserInstance 
+            expect(mockRes.render).toHaveBeenCalledWith('admin/changePasswordadmin', {
+                success: 'Password berhasil diganti.',
+                user: mockUserInstance
             });
         });
 
