@@ -10,6 +10,9 @@ describe("UserController Unit Test Lengkap", () => {
   let req, res;
 
   beforeEach(() => {
+    // Mock console.error to suppress error messages during tests
+    jest.spyOn(console, 'error').mockImplementation(() => { });
+
     mockUserModel = {
       findAll: jest.fn(),
       findOne: jest.fn(),
@@ -33,6 +36,10 @@ describe("UserController Unit Test Lengkap", () => {
       status: jest.fn().mockReturnThis(),
       send: jest.fn()
     };
+  });
+
+  afterEach(() => {
+    console.error.mockRestore();
   });
 
   // LIST USERS
