@@ -2,7 +2,7 @@ const HistoryController = require("../../../controllers/HistoryController");
 const DocumentService = require("../../../services/DocumentService");
 const { Op } = require("sequelize");
 
-jest.mock("../../../services/DocumentService"); 
+jest.mock("../../../services/DocumentService");
 
 describe("HistoryController — Standard Unit Test", () => {
     let mockModels, controller, req, res;
@@ -10,6 +10,9 @@ describe("HistoryController — Standard Unit Test", () => {
     const mockReports = [{ id: 1, email: mockUser.email, jenis_laporan: 'Elektronik' }];
 
     beforeEach(() => {
+        // Mock console.error to suppress error messages during tests
+        jest.spyOn(console, 'error').mockImplementation(() => { });
+
         mockModels = {
             Laporan: {
                 findAll: jest.fn(),
@@ -43,8 +46,12 @@ describe("HistoryController — Standard Unit Test", () => {
             send: jest.fn(),
             json: jest.fn(),
             // Mock res.download untuk segera memanggil callback (untuk menguji cleanup)
-            download: jest.fn((p, f, cb) => cb && cb(null)), 
+            download: jest.fn((p, f, cb) => cb && cb(null)),
         };
+    });
+
+    afterEach(() => {
+        console.error.mockRestore();
     });
 
     // --- 1. getDoneReports() ---
@@ -73,9 +80,9 @@ describe("HistoryController — Standard Unit Test", () => {
                 reports: mockReports,
             }));
         });
-        
+
         test("should render with empty array if no reports found", async () => {
-            mockModels.Laporan.findAll.mockResolvedValue([]); 
+            mockModels.Laporan.findAll.mockResolvedValue([]);
 
             await controller.getDoneReports(req, res);
 
@@ -120,7 +127,7 @@ describe("HistoryController — Standard Unit Test", () => {
             expect(res.status).toHaveBeenCalledWith(500);
             expect(res.send).toHaveBeenCalledWith("Terjadi kesalahan saat mengambil laporan");
         });
-        
+
         test("should return 500 on error during Laporan.findAll", async () => {
             mockModels.Laporan.findAll.mockRejectedValue(new Error("DB Error"));
 
@@ -145,12 +152,12 @@ describe("HistoryController — Standard Unit Test", () => {
                     where: { status: "Done" },
                 })
             );
-            expect(res.render).toHaveBeenCalledWith("admin/history", expect.objectContaining({ 
-                reports: mockReports, 
-                user: mockUser 
+            expect(res.render).toHaveBeenCalledWith("admin/history", expect.objectContaining({
+                reports: mockReports,
+                user: mockUser
             }));
         });
-        
+
         test("should apply both filters", async () => {
             req.query = { filterJenis: "Elektronik", searchNama: "HP" };
             mockModels.Laporan.findAll.mockResolvedValue([]);
@@ -161,13 +168,13 @@ describe("HistoryController — Standard Unit Test", () => {
             expect(whereClause.jenis_laporan).toBe("Elektronik");
             expect(whereClause.nama_barang).toEqual({ [Op.like]: "%HP%" });
         });
-        
+
         test("should render with empty array if no reports found", async () => {
             mockModels.Laporan.findAll.mockResolvedValue([]);
 
             await controller.getDoneReportsAdmin(req, res);
 
-            expect(res.render).toHaveBeenCalledWith("admin/history", expect.objectContaining({ 
+            expect(res.render).toHaveBeenCalledWith("admin/history", expect.objectContaining({
                 reports: [],
             }));
         });
@@ -217,7 +224,7 @@ describe("HistoryController — Standard Unit Test", () => {
             req.params.id = 1;
 
             await controller.getReportHistoryById(req, res);
-            
+
             // Pastikan dipanggil dengan filter email
             expect(mockModels.Laporan.findOne).toHaveBeenCalledWith(
                 expect.objectContaining({
@@ -258,7 +265,7 @@ describe("HistoryController — Standard Unit Test", () => {
             mockModels.Laporan.findOne.mockResolvedValue({ id: 1 });
 
             await controller.getReportHistoryByIdAdmin(req, res);
-            
+
             // Perbaikan: Pastikan dipanggil tanpa filter email
             expect(mockModels.Laporan.findOne).toHaveBeenCalledWith(
                 expect.not.objectContaining({ where: expect.objectContaining({ email: expect.anything() }) })
@@ -301,10 +308,10 @@ describe("HistoryController — Standard Unit Test", () => {
         // Perbaikan/Penambahan: Menguji cleanup pada sukses download
         test("should call cleanup on successful download", async () => {
             mockModels.Laporan.findOne.mockResolvedValue({ id_laporan: 1 });
-            
+
             // Re-mock DocumentService agar mockCleanup bisa dilacak
             const mockCleanup = jest.fn();
-            controller.documentService.cleanup = mockCleanup; 
+            controller.documentService.cleanup = mockCleanup;
 
             req.params.id = 1;
             res.download = jest.fn((path, filename, cb) => cb(null)); // Mock sukses download
@@ -318,8 +325,8 @@ describe("HistoryController — Standard Unit Test", () => {
         test("should call cleanup even if download callback returns error", async () => {
             mockModels.Laporan.findOne.mockResolvedValue({ id_laporan: 1 });
             const mockCleanup = jest.fn();
-            controller.documentService.cleanup = mockCleanup; 
-            
+            controller.documentService.cleanup = mockCleanup;
+
             req.params.id = 1;
             res.download = jest.fn((path, filename, cb) => cb(new Error("Download error")));
 
@@ -356,13 +363,13 @@ describe("HistoryController — Standard Unit Test", () => {
 
             expect(res.download).toHaveBeenCalled();
         });
-        
+
         // Perbaikan/Penambahan: Menguji cleanup pada sukses download
         test("should call cleanup on successful download", async () => {
             mockModels.Laporan.findOne.mockResolvedValue({ id_laporan: 1 });
-            
+
             const mockCleanup = jest.fn();
-            controller.documentService.cleanup = mockCleanup; 
+            controller.documentService.cleanup = mockCleanup;
 
             req.params.id = 1;
             res.download = jest.fn((path, filename, cb) => cb(null));
@@ -376,8 +383,8 @@ describe("HistoryController — Standard Unit Test", () => {
         test("should call cleanup even if download callback returns error", async () => {
             mockModels.Laporan.findOne.mockResolvedValue({ id_laporan: 1 });
             const mockCleanup = jest.fn();
-            controller.documentService.cleanup = mockCleanup; 
-            
+            controller.documentService.cleanup = mockCleanup;
+
             req.params.id = 1;
             res.download = jest.fn((path, filename, cb) => cb(new Error("Download error")));
 

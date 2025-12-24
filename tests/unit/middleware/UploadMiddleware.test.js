@@ -21,7 +21,10 @@ describe("UploadMiddleware", () => {
     const uploadDir = path.resolve(__dirname, "../../..", "uploads");
 
     beforeEach(() => {
-        configureDirectorySpy = jest.spyOn(UploadMiddleware.prototype, 'configureDirectory').mockImplementation(() => {});
+        // Mock console.log to suppress messages during tests
+        jest.spyOn(console, 'log').mockImplementation(() => { });
+
+        configureDirectorySpy = jest.spyOn(UploadMiddleware.prototype, 'configureDirectory').mockImplementation(() => { });
 
         fs.existsSync.mockClear();
         fs.mkdirSync.mockClear();
@@ -33,13 +36,14 @@ describe("UploadMiddleware", () => {
 
     afterEach(() => {
         configureDirectorySpy.mockRestore();
+        console.log.mockRestore();
     });
 
     test("should create upload directory if it does not exist", () => {
-        configureDirectorySpy.mockRestore(); 
-        
+        configureDirectorySpy.mockRestore();
+
         fs.existsSync.mockReturnValue(false);
-        fs.mkdirSync.mockImplementation(() => {});
+        fs.mkdirSync.mockImplementation(() => { });
 
         uploadMiddleware.configureDirectory();
 
@@ -48,15 +52,15 @@ describe("UploadMiddleware", () => {
     });
 
     test("should not recreate directory if it already exists", () => {
-        configureDirectorySpy.mockRestore(); 
-        
+        configureDirectorySpy.mockRestore();
+
         fs.existsSync.mockReturnValue(true);
-        fs.mkdirSync.mockClear(); 
+        fs.mkdirSync.mockClear();
 
         uploadMiddleware.configureDirectory();
 
         expect(fs.existsSync).toHaveBeenCalledWith(uploadDir);
-        expect(fs.mkdirSync).not.toHaveBeenCalled(); 
+        expect(fs.mkdirSync).not.toHaveBeenCalled();
     });
 
     test("should accept valid JPEG file", () => {
@@ -103,7 +107,7 @@ describe("UploadMiddleware", () => {
 
     test("should generate valid filename with correct extension", () => {
         const mockCb = jest.fn();
-        const storage = uploadMiddleware.createStorageEngine(); 
+        const storage = uploadMiddleware.createStorageEngine();
 
         const file = { fieldname: "foto", originalname: "gambar.png" };
         storage.filename({}, file, mockCb);
@@ -144,7 +148,7 @@ describe("UploadMiddleware", () => {
 
     test("getUploader should return multer instance", () => {
         const mockMulterInstance = { single: jest.fn() };
-        uploadMiddleware.multerInstance = mockMulterInstance; 
+        uploadMiddleware.multerInstance = mockMulterInstance;
 
         const result = uploadMiddleware.getUploader();
         expect(result).toBe(mockMulterInstance);

@@ -7,6 +7,9 @@ describe("ValidTokenMiddleware", () => {
     let req, res, next;
 
     beforeEach(() => {
+        // Mock console.error to suppress error messages during tests
+        jest.spyOn(console, 'error').mockImplementation(() => { });
+
         req = {
             cookies: {},
         };
@@ -21,6 +24,10 @@ describe("ValidTokenMiddleware", () => {
         next = jest.fn();
 
         jest.clearAllMocks();
+    });
+
+    afterEach(() => {
+        console.error.mockRestore();
     });
 
     test("should redirect to '/' when token is missing", () => {

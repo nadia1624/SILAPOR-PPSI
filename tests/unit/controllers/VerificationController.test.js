@@ -4,6 +4,9 @@ describe("VerificationController", () => {
     let controller, mockModels, mockReq, mockRes;
 
     beforeEach(() => {
+        // Mock console.error to suppress error messages during tests
+        jest.spyOn(console, 'error').mockImplementation(() => { });
+
         mockModels = {
             Laporan: {
                 findAll: jest.fn(),
@@ -30,6 +33,10 @@ describe("VerificationController", () => {
         };
 
         jest.clearAllMocks();
+    });
+
+    afterEach(() => {
+        console.error.mockRestore();
     });
 
     describe("getPendingReports()", () => {
