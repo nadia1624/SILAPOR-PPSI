@@ -1,146 +1,15 @@
-const EmailService = require('../../../services/EmailService');
 const DocumentService = require('../../../services/DocumentService');
-const nodemailer = require('nodemailer');
-const ejs = require('ejs');
 const fs = require('fs');
-const path = require('path');
 const { exec } = require('child_process');
 const PizZip = require('pizzip');
 const Docxtemplater = require('docxtemplater');
 const ImageModule = require('docxtemplater-image-module-free');
 
-// Mock dependencies
-jest.mock('nodemailer');
-jest.mock('ejs');
 jest.mock('fs');
 jest.mock('child_process');
 jest.mock('pizzip');
 jest.mock('docxtemplater');
 jest.mock('docxtemplater-image-module-free');
-
-describe('EmailService', () => {
-    let emailService;
-    let mockTransporter;
-
-    beforeEach(() => {
-        jest.clearAllMocks();
-
-        // Mock transporter
-        mockTransporter = {
-            sendMail: jest.fn().mockResolvedValue({ messageId: 'test-message-id' }),
-        };
-        nodemailer.createTransport.mockReturnValue(mockTransporter);
-
-        // Mock environment variables
-        process.env.EMAIL_USER = 'test@example.com';
-        process.env.EMAIL_PASS = 'testpassword';
-
-        emailService = new EmailService();
-    });
-
-    describe('constructor', () => {
-        it('should initialize with correct transporter configuration', () => {
-            expect(nodemailer.createTransport).toHaveBeenCalledWith({
-                service: 'gmail',
-                auth: {
-                    user: 'test@example.com',
-                    pass: 'testpassword',
-                },
-            });
-            expect(emailService.senderEmail).toBe('"SILAPOR" <test@example.com>');
-        });
-    });
-
-    describe('sendVerificationEmail', () => {
-        it('should send verification email successfully', async () => {
-            const mockUser = {
-                nama: 'Test User',
-                email: 'user@example.com',
-            };
-            const mockToken = 'test-token-123';
-            const mockHtml = '<html>Verification Email</html>';
-
-            ejs.renderFile.mockResolvedValue(mockHtml);
-
-            await emailService.sendVerificationEmail(mockUser, mockToken);
-
-            expect(ejs.renderFile).toHaveBeenCalledWith(
-                expect.stringContaining('emailRegis.ejs'),
-                {
-                    nama: 'Test User',
-                    verifyLink: 'http://localhost:3000/verify-email?token=test-token-123',
-                }
-            );
-
-            expect(mockTransporter.sendMail).toHaveBeenCalledWith({
-                from: '"SILAPOR" <test@example.com>',
-                to: 'user@example.com',
-                subject: 'Verifikasi Email Anda',
-                html: mockHtml,
-            });
-        });
-
-        it('should handle error during email sending', async () => {
-            const mockUser = {
-                nama: 'Test User',
-                email: 'user@example.com',
-            };
-            const mockToken = 'test-token-123';
-
-            ejs.renderFile.mockResolvedValue('<html>Test</html>');
-            mockTransporter.sendMail.mockRejectedValue(new Error('SMTP Error'));
-
-            await expect(emailService.sendVerificationEmail(mockUser, mockToken)).rejects.toThrow('SMTP Error');
-        });
-
-        it('should handle error during template rendering', async () => {
-            const mockUser = {
-                nama: 'Test User',
-                email: 'user@example.com',
-            };
-            const mockToken = 'test-token-123';
-
-            ejs.renderFile.mockRejectedValue(new Error('Template not found'));
-
-            await expect(emailService.sendVerificationEmail(mockUser, mockToken)).rejects.toThrow('Template not found');
-        });
-    });
-
-    describe('sendResetPasswordEmail', () => {
-        it('should send reset password email successfully', async () => {
-            const mockUser = {
-                nama: 'Test User',
-                email: 'user@example.com',
-            };
-            const mockToken = 'reset-token-123';
-
-            await emailService.sendResetPasswordEmail(mockUser, mockToken);
-
-            expect(mockTransporter.sendMail).toHaveBeenCalledWith({
-                from: '"SILAPOR" <test@example.com>',
-                to: 'user@example.com',
-                subject: 'Reset Password SILAPOR',
-                html: expect.stringContaining('http://localhost:3000/reset-password?token=reset-token-123'),
-            });
-
-            const callArgs = mockTransporter.sendMail.mock.calls[0][0];
-            expect(callArgs.html).toContain('Halo Test User');
-            expect(callArgs.html).toContain('reset password');
-        });
-
-        it('should handle error during reset password email sending', async () => {
-            const mockUser = {
-                nama: 'Test User',
-                email: 'user@example.com',
-            };
-            const mockToken = 'reset-token-123';
-
-            mockTransporter.sendMail.mockRejectedValue(new Error('Network Error'));
-
-            await expect(emailService.sendResetPasswordEmail(mockUser, mockToken)).rejects.toThrow('Network Error');
-        });
-    });
-});
 
 describe('DocumentService', () => {
     let documentService;
@@ -150,14 +19,15 @@ describe('DocumentService', () => {
     beforeEach(() => {
         jest.clearAllMocks();
 
-        // Mock file system
+        // Mock console.error to suppress error messages during tests
+        jest.spyOn(console, 'error').mockImplementation(() => { });
+
         fs.existsSync.mockReturnValue(true);
         fs.mkdirSync.mockReturnValue(undefined);
         fs.readFileSync.mockReturnValue('mock-file-content');
         fs.writeFileSync.mockReturnValue(undefined);
         fs.unlinkSync.mockReturnValue(undefined);
 
-        // Mock PizZip and Docxtemplater
         mockZip = {
             generate: jest.fn().mockReturnValue('mock-zip-buffer'),
         };
@@ -170,6 +40,10 @@ describe('DocumentService', () => {
         ImageModule.mockReturnValue({});
 
         documentService = new DocumentService();
+    });
+
+    afterEach(() => {
+        console.error.mockRestore();
     });
 
     describe('constructor', () => {
@@ -422,65 +296,56 @@ describe('DocumentService', () => {
 
         it('should reject if PDF file is not created after conversion', async () => {
             jest.useFakeTimers();
-            
+
             exec.mockImplementation((cmd, callback) => callback(null, 'success'));
-            
-            // Mock file doesn't exist even after waiting
+
             fs.existsSync.mockImplementation((filePath) => {
                 if (filePath.endsWith('.pdf')) return false;
                 return true;
             });
 
             const generatePromise = documentService.generatePdf(mockLaporan);
-            
-            // Fast-forward through all timers
+
             jest.runAllTimers();
-            
+
             await expect(generatePromise).rejects.toThrow(
                 'File PDF gagal dibuat atau belum muncul.'
             );
-            
+
             jest.useRealTimers();
         });
 
         it('should handle ImageModule configuration', async () => {
-            // Clear previous mocks
             ImageModule.mockClear();
             Docxtemplater.mockClear();
-            
+
             exec.mockImplementation((cmd, callback) => callback(null, 'success'));
-            
+
             await documentService.generatePdf(mockLaporan);
-            
-            // Get the ImageModule configuration
+
             const imageModuleConfig = ImageModule.mock.calls[0][0];
-            
+
             expect(imageModuleConfig.centered).toBe(true);
             expect(typeof imageModuleConfig.getImage).toBe('function');
             expect(typeof imageModuleConfig.getSize).toBe('function');
-            
-            // Test getSize
+
             const size = imageModuleConfig.getSize();
             expect(size).toEqual([150, 150]);
-            
-            // Test getImage with missing file
+
             fs.existsSync.mockReturnValue(false);
             fs.readFileSync.mockReturnValue('noimage-content');
             let result = imageModuleConfig.getImage('non-existent-path.jpg');
             expect(result).toBe('noimage-content');
-            
-            // Test getImage with valid file
+
             fs.existsSync.mockReturnValue(true);
             fs.readFileSync.mockReturnValue('valid-image-content');
             result = imageModuleConfig.getImage('valid-path.jpg');
             expect(result).toBe('valid-image-content');
-            
-            // Test getImage with null tagValue
+
             fs.readFileSync.mockReturnValue('noimage-content');
             result = imageModuleConfig.getImage(null);
             expect(result).toBe('noimage-content');
-            
-            // Test getImage with error during file read
+
             fs.existsSync.mockReturnValue(true);
             fs.readFileSync.mockImplementation((filePath) => {
                 if (filePath.includes('noimage.png')) return 'noimage-content';
@@ -488,8 +353,7 @@ describe('DocumentService', () => {
             });
             result = imageModuleConfig.getImage('error-path.jpg');
             expect(result).toBe('noimage-content');
-            
-            // Test Docxtemplater nullGetter
+
             const docxConfig = Docxtemplater.mock.calls[0][1];
             expect(docxConfig.nullGetter()).toBe('-');
         });
