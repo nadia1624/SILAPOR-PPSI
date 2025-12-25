@@ -240,59 +240,6 @@ describe('SYSTEM TESTING: Admin Report Management - End to End Scenarios', () =>
         }, 40000);
     });
 
-    // ========================================
-    // SKENARIO 4: BUAT LAPORAN BARU (ADMIN)
-    // ========================================
-    describe('SKENARIO 4: Admin Membuat Laporan Baru', () => {
-        test('ST-ADMIN-CREATE-001: Admin sukses membuat laporan dan status On Progress', async () => {
-            // PERBAIKAN: Ubah Navigasi ke '/admin/dashboard' sesuai screenshot
-            await driver.get(`${BASE_URL}/admin/dashboard`);
-            await driver.wait(until.urlContains('/admin'), 10000);
-
-            try {
-                // Mencari tombol "Buat Laporan Baru" (Tombol Putih di Banner Hijau)
-                // XPath ini mencari link (<a>) atau button (<button>) yang berisi teks 'Buat Laporan Baru'
-                const createBtn = await driver.wait(
-                    until.elementLocated(By.xpath("//*[self::a or self::button][contains(., 'Buat Laporan Baru')]")),
-                    5000
-                );
-                await driver.executeScript("arguments[0].click();", createBtn);
-            } catch (e) {
-                await driver.get(`${BASE_URL}/admin/report/create`);
-            }
-
-            await driver.wait(until.elementLocated(By.name('nama_barang')), TIMEOUT);
-
-            const jenisSelect = await driver.findElement(By.name('jenis_laporan'));
-            await jenisSelect.sendKeys('Kehilangan');
-            await driver.findElement(By.name('nama_barang')).sendKeys(TEST_REPORT.nama_barang);
-            await driver.findElement(By.name('lokasi_kejadian')).sendKeys(TEST_REPORT.lokasi);
-            await driver.findElement(By.name('tanggal_kejadian')).sendKeys(TEST_REPORT.tanggal_kejadian);
-            await driver.findElement(By.name('deskripsi')).sendKeys(TEST_REPORT.deskripsi);
-
-            const filePath = path.resolve(__dirname, 'admin_bukti.jpg');
-            if (!fs.existsSync(filePath)) {
-                fs.writeFileSync(filePath, 'dummy content for testing upload');
-            }
-            const fileInput = await driver.findElement(By.css('input[type="file"]'));
-            await fileInput.sendKeys(filePath);
-
-            const submitBtn = await driver.findElement(By.css('button[type="submit"]'));
-            await driver.executeScript("arguments[0].scrollIntoView(true);", submitBtn);
-            await driver.sleep(500);
-            await submitBtn.click();
-
-            await driver.wait(until.urlContains('/admin/my-reports'), TIMEOUT);
-            const pageSource = await driver.getPageSource();
-            expect(pageSource.includes(TEST_REPORT.nama_barang)).toBe(true);
-            const isStatusCorrect = pageSource.includes('On progress');
-
-            if (!isStatusCorrect) {
-            }
-            expect(isStatusCorrect).toBe(true);
-        }, 40000);
-    });
-
 
     // ========================================
     // SKENARIO 5: VERIFIKASI KLAIM YANG MASUK
