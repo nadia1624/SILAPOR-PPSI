@@ -7,7 +7,6 @@ describe('ClaimController', () => {
   let mockRes;
 
   beforeEach(() => {
-    // Mock models
     mockModels = {
       Claim: {
         findAll: jest.fn(),
@@ -21,10 +20,8 @@ describe('ClaimController', () => {
       },
     };
 
-    // Initialize controller
     controller = new ClaimController(mockModels);
 
-    // Mock request and response objects
     mockReq = {
       user: { email: 'test@example.com' },
       params: {},
@@ -37,8 +34,7 @@ describe('ClaimController', () => {
       send: jest.fn(),
     };
 
-    // Clear console.error mock
-    jest.spyOn(console, 'error').mockImplementation(() => {});
+    jest.spyOn(console, 'error').mockImplementation(() => { });
   });
 
   afterEach(() => {

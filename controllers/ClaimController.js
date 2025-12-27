@@ -1,7 +1,4 @@
 class ClaimController {
-    /**
-     * @param {Object} models 
-     */
     constructor(models) {
         this.Claim = models.Claim;
         this.Laporan = models.Laporan;
@@ -13,49 +10,32 @@ class ClaimController {
         this.cancelClaimAdmin = this.cancelClaimAdmin.bind(this);
     }
 
-    // --- METODE UTILITY (Private/Helper) ---
-
-    /**
-     * Metode pembantu untuk mengambil klaim dan memformat laporan.
-     * @param {string} emailUser - Email pengguna yang sedang login.
-     * @returns {Array} Daftar laporan yang diklaim.
-     */
     async #fetchAndFormatClaims(emailUser) {
-        // Menggunakan Sequelize FindAll dengan eager loading (include)
         const claims = await this.Claim.findAll({
             where: { email: emailUser },
             include: [
                 {
                     model: this.Laporan,
-                    // Menggunakan model yang sudah diinisialisasi
-                    include: [{ model: this.User }], 
+                    include: [{ model: this.User }],
                 },
             ],
             order: [['id_claim', 'DESC']],
         });
 
-        // Memformat data agar laporan berisi data Claim di dalamnya
         const reports = claims.map((claim) => {
             const laporan = claim.Laporan.toJSON();
-            laporan.Claim = claim.toJSON(); 
+            laporan.Claim = claim.toJSON();
             return laporan;
         });
 
         return reports;
     }
 
-    /**
-     * Metode pembantu untuk membatalkan klaim dan mengupdate status laporan.
-     * @param {string} idLaporan - ID Laporan yang dibatalkan.
-     * @param {string} emailUser - Email pengguna yang membatalkan.
-     */
     async #processCancelClaim(idLaporan, emailUser) {
-        // Hapus entri dari tabel Claim
         await this.Claim.destroy({
             where: { id_laporan: idLaporan, email: emailUser },
         });
 
-        // Update status Laporan
         await this.Laporan.update(
             { status: "On progress", pengklaim: null, no_hp_pengklaim: null },
             { where: { id_laporan: idLaporan } }
@@ -63,7 +43,6 @@ class ClaimController {
     }
 
 
-    // --- CONTROLLER METHODS (Public) ---
 
     async getMyClaims(req, res) {
         try {
@@ -80,7 +59,6 @@ class ClaimController {
 
     async getMyClaimsAdmin(req, res) {
         try {
-            // Logika sama persis dengan getMyClaims, hanya beda view
             const emailUser = req.user.email;
             const reports = await this.#fetchAndFormatClaims(emailUser);
             const pengguna = await this.User.findOne({ where: { email: emailUser } });

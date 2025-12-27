@@ -3,10 +3,8 @@ const nodemailer = require('nodemailer');
 const fs = require('fs');
 const path = require('path');
 
-// Mock nodemailer
 jest.mock('nodemailer');
 
-// Mock fs
 jest.mock('fs');
 
 describe('ReportService', () => {
@@ -14,27 +12,22 @@ describe('ReportService', () => {
   let mockTransporter;
 
   beforeEach(() => {
-    // Clear all mocks
     jest.clearAllMocks();
 
-    // Mock environment variables
     process.env.EMAIL_USER = 'test@example.com';
     process.env.EMAIL_PASS = 'testpassword';
 
-    // Mock transporter
     mockTransporter = {
       sendMail: jest.fn(),
     };
 
     nodemailer.createTransport.mockReturnValue(mockTransporter);
 
-    // Initialize service
     service = new ReportService();
 
-    // Clear console mocks
-    jest.spyOn(console, 'error').mockImplementation(() => {});
-    jest.spyOn(console, 'log').mockImplementation(() => {});
-    jest.spyOn(console, 'warn').mockImplementation(() => {});
+    jest.spyOn(console, 'error').mockImplementation(() => { });
+    jest.spyOn(console, 'log').mockImplementation(() => { });
+    jest.spyOn(console, 'warn').mockImplementation(() => { });
   });
 
   afterEach(() => {
@@ -239,7 +232,7 @@ describe('ReportService', () => {
       };
 
       fs.existsSync.mockReturnValue(true);
-      fs.unlinkSync.mockImplementation(() => {});
+      fs.unlinkSync.mockImplementation(() => { });
 
       service.cleanupUploadedFile(mockReq);
 
@@ -284,7 +277,7 @@ describe('ReportService', () => {
       };
 
       fs.existsSync.mockReturnValue(true);
-      fs.unlinkSync.mockImplementation(() => {});
+      fs.unlinkSync.mockImplementation(() => { });
 
       service.cleanupUploadedFile(mockReq);
 
@@ -317,7 +310,7 @@ describe('ReportService', () => {
       const filename = 'old-photo.jpg';
 
       fs.existsSync.mockReturnValue(true);
-      fs.unlinkSync.mockImplementation(() => {});
+      fs.unlinkSync.mockImplementation(() => { });
 
       service.deleteOldFile(filename);
 
@@ -341,7 +334,7 @@ describe('ReportService', () => {
       const filename = 'photo-123.png';
 
       fs.existsSync.mockReturnValue(true);
-      fs.unlinkSync.mockImplementation(() => {});
+      fs.unlinkSync.mockImplementation(() => { });
 
       service.deleteOldFile(filename);
 
@@ -376,7 +369,7 @@ describe('ReportService', () => {
       const filename = 'subfolder/image.jpg';
 
       fs.existsSync.mockReturnValue(true);
-      fs.unlinkSync.mockImplementation(() => {});
+      fs.unlinkSync.mockImplementation(() => { });
 
       service.deleteOldFile(filename);
 
@@ -389,7 +382,7 @@ describe('ReportService', () => {
   describe('Integration scenarios', () => {
     test('should handle multiple file operations in sequence', () => {
       fs.existsSync.mockReturnValue(true);
-      fs.unlinkSync.mockImplementation(() => {});
+      fs.unlinkSync.mockImplementation(() => { });
 
       service.deleteOldFile('old1.jpg');
       service.deleteOldFile('old2.jpg');

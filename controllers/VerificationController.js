@@ -1,7 +1,4 @@
 class VerificationController {
-    /**
-     * @param {Object} models 
-     */
     constructor(models) {
         this.Laporan = models.Laporan;
         this.User = models.User;
@@ -9,17 +6,12 @@ class VerificationController {
         this.getPendingReports = this.getPendingReports.bind(this);
         this.verifyReport = this.verifyReport.bind(this);
     }
-    /**
-     * Helper untuk memproses persetujuan atau penolakan verifikasi laporan.
-     * @param {Object} laporan 
-     * @param {string} action 
-     * @param {string} [alasan=null] 
-     */
+
     #setVerificationStatus(laporan, action, alasan = null) {
         if (action === "approve") {
             laporan.status = "On progress";
             laporan.verifikasi_action = "approve";
-            laporan.alasan = null; 
+            laporan.alasan = null;
         } else {
             laporan.status = "Upload verification rejected";
             laporan.verifikasi_action = "denied";
@@ -34,7 +26,7 @@ class VerificationController {
                 include: [{ model: this.User }],
                 order: [["createdAt", "DESC"]],
             });
-            
+
             const user = await this.User.findOne({ where: { email: req.user.email } });
 
             res.render("admin/verifikasi", { reports, user });
@@ -47,13 +39,13 @@ class VerificationController {
     async verifyReport(req, res) {
         try {
             const { id } = req.params;
-            const { action, alasan } = req.body; 
+            const { action, alasan } = req.body;
 
             const laporan = await this.Laporan.findByPk(id);
             if (!laporan) {
                 return res.status(404).send("Laporan tidak ditemukan");
             }
-            
+
             this.#setVerificationStatus(laporan, action, alasan);
 
             await laporan.save();

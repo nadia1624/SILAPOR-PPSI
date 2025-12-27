@@ -85,8 +85,7 @@ describe('SYSTEM TESTING: Admin Claim Management - End to End Scenarios', () => 
                 const bodyText = await driver.findElement(By.tagName('body')).getText();
                 expect(bodyText.length).toBeGreaterThan(0);
 
-            } catch (error) {
-            }
+            } catch (error) { }
         }, 30000);
 
         test('ST-CLAIM-ADMIN-003: Admin dapat membatalkan klaim yang sedang menunggu persetujuan', async () => {
@@ -229,9 +228,7 @@ describe('SYSTEM TESTING: Admin Claim Management - End to End Scenarios', () => 
                     By.xpath("//button[contains(., 'Tolak Klaim') or contains(., 'Reject')]")
                 );
 
-                if (rejectButtons.length > 0) {
-                } else {
-                }
+                if (rejectButtons.length > 0) { }
             } catch (error) {
             }
         }, 30000);
@@ -268,9 +265,7 @@ describe('SYSTEM TESTING: Admin Claim Management - End to End Scenarios', () => 
                     By.xpath("//select | //button[contains(., 'Filter')] | //input[@type='search'] | //a[contains(@href, 'filter')]")
                 );
 
-                if (filterElements.length > 0) {
-                } else {
-                }
+                if (filterElements.length > 0) { }
             } catch (error) {
             }
         }, 30000);
