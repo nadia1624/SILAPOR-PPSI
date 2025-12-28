@@ -7,7 +7,6 @@ const path = require('path');
 const BASE_URL = process.env.BASE_URL || 'http://localhost:3000';
 const TIMEOUT = 15000;
 
-// Path untuk dummy image
 const DUMMY_IMG_PATH = path.resolve(__dirname, '../../test-assets/dummy-image.jpg');
 
 const MAHASISWA_CREDENTIALS = {
@@ -15,13 +14,11 @@ const MAHASISWA_CREDENTIALS = {
     password: 'Nadia123_'
 };
 
-// Fungsi untuk klik menggunakan JavaScript (menghindari element intercept)
 const jsClick = async (driver, selector) => {
     const element = await driver.wait(until.elementLocated(selector), 10000);
     await driver.executeScript("arguments[0].click();", element);
 };
 
-// Fungsi untuk menunggu SweetAlert
 const waitForSwal = async (driver, timeout = 5000) => {
     return await driver.wait(
         until.elementLocated(By.css('.swal2-popup, .swal2-modal')),
@@ -69,9 +66,6 @@ describe('SYSTEM TESTING: Mahasiswa Claim Management - End to End Scenarios', ()
         if (driver) await driver.quit();
     });
 
-    // ========================================
-    // SKENARIO 1: MELIHAT KLAIM SAYA (READ)
-    // ========================================
     describe('SKENARIO 1: Mahasiswa Melihat dan Mengelola Klaim Barang (Read Claim Laporan)', () => {
         test('ST-CLAIM-MAH-001: Mahasiswa dapat membuka halaman Klaim Saya', async () => {
             await driver.get(`${BASE_URL}/mahasiswa/my-claim`);
@@ -133,9 +127,6 @@ describe('SYSTEM TESTING: Mahasiswa Claim Management - End to End Scenarios', ()
         }, 30000);
     });
 
-    // ========================================
-    // SKENARIO 2: MEMBUAT KLAIM LAPORAN (CREATE)
-    // ========================================
     describe('SKENARIO 2: Mahasiswa Membuat Klaim Laporan (Create Claim)', () => {
         test('ST-CLAIM-MAH-004: Mahasiswa dapat mengklaim laporan dari halaman laporan', async () => {
             await driver.get(`${BASE_URL}/mahasiswa/home`);
@@ -176,9 +167,6 @@ describe('SYSTEM TESTING: Mahasiswa Claim Management - End to End Scenarios', ()
         }, 30000);
     });
 
-    // ========================================
-    // SKENARIO 3: MELIHAT STATUS PENGAJUAN KLAIM (READ STATUS)
-    // ========================================
     describe('SKENARIO 3: Mahasiswa Melihat Status Pengajuan Klaim (Read Status Pengajuan)', () => {
         test('ST-CLAIM-MAH-006: Mahasiswa dapat melihat status klaim pada halaman Klaim Saya', async () => {
             await driver.get(`${BASE_URL}/mahasiswa/my-claim`);
@@ -225,9 +213,6 @@ describe('SYSTEM TESTING: Mahasiswa Claim Management - End to End Scenarios', ()
         }, 30000);
     });
 
-    // ========================================
-    // SKENARIO 4: MENERIMA KLAIM PADA LAPORAN MILIK SENDIRI (ACCEPT CLAIM)
-    // ========================================
     describe('SKENARIO 4: Mahasiswa Menerima Klaim pada Laporan Miliknya', () => {
 
         test('ST-CLAIM-MAH-008: Mahasiswa dapat melihat halaman my-reports dengan klaim yang masuk', async () => {
@@ -344,9 +329,6 @@ describe('SYSTEM TESTING: Mahasiswa Claim Management - End to End Scenarios', ()
         }, 20000);
     });
 
-    // ========================================
-    // SKENARIO 5: MENOLAK KLAIM PADA LAPORAN MILIK SENDIRI (REJECT CLAIM)
-    // ========================================
     describe('SKENARIO 5: Mahasiswa Menolak Klaim pada Laporan Miliknya', () => {
 
         test('ST-CLAIM-MAH-012: Mahasiswa dapat menolak klaim dengan memberikan alasan', async () => {
@@ -455,9 +437,6 @@ describe('SYSTEM TESTING: Mahasiswa Claim Management - End to End Scenarios', ()
         }, 25000);
     });
 
-    // ========================================
-    // SKENARIO 6: VALIDASI FORM ACCEPT DAN REJECT KLAIM
-    // ========================================
     describe('SKENARIO 6: Validasi Form Accept dan Reject Klaim', () => {
 
         test('ST-CLAIM-MAH-015: Sistem menampilkan error jika accept tanpa upload bukti', async () => {

@@ -19,7 +19,6 @@ describe('DocumentService', () => {
     beforeEach(() => {
         jest.clearAllMocks();
 
-        // Mock console.error to suppress error messages during tests
         jest.spyOn(console, 'error').mockImplementation(() => { });
 
         fs.existsSync.mockReturnValue(true);
