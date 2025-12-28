@@ -7,7 +7,6 @@ describe('LandingController', () => {
   let mockRes;
 
   beforeEach(() => {
-    // Mock models
     mockModels = {
       Laporan: {
         findAll: jest.fn(),
@@ -19,12 +18,10 @@ describe('LandingController', () => {
       },
     };
 
-    // Initialize controller
     controller = new LandingController(mockModels);
 
-    // Mock request and response objects
     mockReq = {
-      user: null, // Landing page might not have authenticated user
+      user: null,
     };
 
     mockRes = {
@@ -33,8 +30,7 @@ describe('LandingController', () => {
       send: jest.fn(),
     };
 
-    // Clear console.error mock
-    jest.spyOn(console, 'error').mockImplementation(() => {});
+    jest.spyOn(console, 'error').mockImplementation(() => { });
   });
 
   afterEach(() => {
@@ -88,7 +84,6 @@ describe('LandingController', () => {
 
       await controller.getLandingPage(mockReq, mockRes);
 
-      // Verify findAll called for Penemuan
       expect(mockModels.Laporan.findAll).toHaveBeenNthCalledWith(1, {
         where: { jenis_laporan: 'Penemuan' },
         include: [{ model: mockModels.User, attributes: ['nama'] }],
@@ -96,7 +91,6 @@ describe('LandingController', () => {
         limit: 5,
       });
 
-      // Verify findAll called for Kehilangan
       expect(mockModels.Laporan.findAll).toHaveBeenNthCalledWith(2, {
         where: { jenis_laporan: 'Kehilangan' },
         include: [{ model: mockModels.User, attributes: ['nama'] }],
@@ -104,7 +98,6 @@ describe('LandingController', () => {
         limit: 5,
       });
 
-      // Verify count for statistics
       expect(mockModels.Laporan.count).toHaveBeenCalledWith({
         where: { status: 'Done' },
       });
@@ -113,7 +106,6 @@ describe('LandingController', () => {
         where: { role: 'mahasiswa' },
       });
 
-      // Verify render called with correct data
       expect(mockRes.render).toHaveBeenCalledWith('landing', {
         title: 'Beranda | Sistem Laporan Barang',
         laporanPenemuan: mockLaporanPenemuan,
