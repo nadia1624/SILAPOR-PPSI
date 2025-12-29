@@ -1,18 +1,17 @@
 <!DOCTYPE html>
 <html lang="id">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Verifikasi Laporan</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/preline@^2/dist/preline.js"></script>
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
-    />
-  </head>
-  <body class="bg-gray-100">
-    <%- include('../components/sidebar') %>
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Verifikasi Laporan</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/preline@^2/dist/preline.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+</head>
+
+<body class="bg-gray-100">
+  <%- include('../components/sidebar') %>
 
     <div class="lg:ml-64 p-4 sm:p-6">
       <h1 class="text-2xl font-semibold text-gray-800 mb-6">
@@ -20,240 +19,156 @@
       </h1>
 
       <div class="space-y-4 sm:space-y-6">
-        <% reports.forEach(report => { %>
-        <div
-          class="flex flex-col sm:flex-row bg-white rounded-xl shadow-md hover:shadow-xl transition-shadow duration-300 overflow-hidden"
-        >
-          <div class="w-full sm:w-48 h-48 sm:h-auto flex-shrink-0">
-            <img
-              src="/uploads/<%= report.foto_barang %>"
-              alt="<%= report.nama_barang %>"
-              class="w-full h-full object-cover"
-            />
-          </div>
-
-          <div class="flex-1 p-4 sm:p-6 flex flex-col justify-between">
-            <div>
-              <h3 class="text-lg sm:text-xl font-bold text-gray-900 mb-2">
-                <%= report.nama_barang %>
-              </h3>
-              <div class="space-y-1 text-sm sm:text-base">
-                <p class="text-gray-600">
-                  <span class="font-medium">Dibuat oleh:</span> <%=
-                  report.User.nama %>
-                </p>
-                <p class="text-gray-500">
-                  <span class="font-medium">Jenis laporan:</span> <%=
-                  report.jenis_laporan %>
-                </p>
-              </div>
-              <span
-                class="inline-block mt-3 px-3 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800"
-              >
-                <%= report.status %>
-              </span>
+        <% reports.forEach(report=> { %>
+          <div
+            class="flex flex-col sm:flex-row bg-white rounded-xl shadow-md hover:shadow-xl transition-shadow duration-300 overflow-hidden">
+            <div class="w-full sm:w-48 h-48 sm:h-auto flex-shrink-0">
+              <img src="/uploads/<%= report.foto_barang %>" alt="<%= report.nama_barang %>"
+                class="w-full h-full object-cover" />
             </div>
 
-            <button
-              type="button"
-              class="mt-4 w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white px-6 py-2.5 rounded-lg font-semibold transition-colors duration-200 shadow-sm hover:shadow-md"
-              onclick="openDetailModal('<%= report.id_laporan %>')"
-            >
-              Verifikasi
-            </button>
-          </div>
-        </div>
-
-        <div
-          id="rejectClaimModal-<%= report.id_laporan %>"
-          class="hidden fixed inset-0 z-50 bg-black bg-opacity-60 flex items-center justify-center p-4"
-        >
-          <div
-            class="modal-content bg-white rounded-2xl shadow-2xl w-full max-w-sm transform scale-95 opacity-0 transition-all duration-300"
-          >
-            <form
-              id="rejectReportForm-<%= report.id_laporan %>"
-              method="POST"
-              action="/admin/verifikasi/<%= report.id_laporan %>"
-            >
-              <input type="hidden" name="action" value="reject" />
-              <input
-                type="hidden"
-                id="alasanFinal-<%= report.id_laporan %>"
-                name="alasan"
-              />
-
-              <div
-                class="flex justify-between items-center p-5 border-b border-gray-200"
-              >
-                <h3 class="text-xl font-bold text-gray-800">
-                  Tolak Verifikasi
+            <div class="flex-1 p-4 sm:p-6 flex flex-col justify-between">
+              <div>
+                <h3 class="text-lg sm:text-xl font-bold text-gray-900 mb-2">
+                  <%= report.nama_barang %>
                 </h3>
-                <button
-                  type="button"
-                  onclick="closeRejectModal('<%= report.id_laporan %>')"
-                  class="text-gray-400 hover:text-gray-600 transition"
-                >
-                  <i class="fas fa-times fa-lg"></i>
-                </button>
-              </div>
-
-              <div class="p-6 space-y-4">
-                <p class="text-gray-700">
-                  Pilih alasan penolakan verifikasi laporan ini:
-                </p>
-
-                <div>
-                  <label
-                    for="alasan-select-<%= report.id_laporan %>"
-                    class="block text-sm font-medium text-gray-700 mb-1"
-                    >Alasan Penolakan</label
-                  >
-                  <select
-                    id="alasan-select-<%= report.id_laporan %>"
-                    required
-                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-red-500 focus:border-red-500 transition"
-                    onchange="handleRejectReasonChange('<%= report.id_laporan %>')"
-                  >
-                    <option value="" disabled selected>
-                      Pilih salah satu alasan
-                    </option>
-                    <option value="Data tidak valid">Data tidak valid</option>
-                    <option value="Bukti foto tidak jelas">
-                      Bukti foto tidak jelas
-                    </option>
-                    <option value="Informasi tidak lengkap">
-                      Informasi tidak lengkap
-                    </option>
-                    <option value="lainnya">Alasan lainnya</option>
-                  </select>
+                <div class="space-y-1 text-sm sm:text-base">
+                  <p class="text-gray-600">
+                    <span class="font-medium">Dibuat oleh:</span>
+                    <%= report.User.nama %>
+                  </p>
+                  <p class="text-gray-500">
+                    <span class="font-medium">Jenis laporan:</span>
+                    <%= report.jenis_laporan %>
+                  </p>
                 </div>
-
-                <div
-                  id="alasanLainnyaContainer-<%= report.id_laporan %>"
-                  class="hidden"
-                >
-                  <label
-                    for="alasanLainnya-textarea-<%= report.id_laporan %>"
-                    class="block text-sm font-medium text-gray-700 mb-1"
-                    >Alasan Lainnya (Detail)</label
-                  >
-                  <textarea
-                    id="alasanLainnya-textarea-<%= report.id_laporan %>"
-                    rows="3"
-                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-red-500 focus:border-red-500 transition"
-                    placeholder="Jelaskan alasan penolakan secara rinci"
-                  ></textarea>
-                </div>
+                <span
+                  class="inline-block mt-3 px-3 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800">
+                  <%= report.status %>
+                </span>
               </div>
 
-              <div
-                class="flex justify-end items-center p-5 border-t border-gray-200 space-x-3"
-              >
-                <button
-                  type="button"
-                  onclick="closeRejectModal('<%= report.id_laporan %>')"
-                  class="flex-1 bg-grey-100 hover:bg-grey-200 text-grey-600 py-2.5 px-4 rounded-xl font-semibold text-center text-sm transition-all duration-200 shadow-md hover:shadow-lg"
-                >
-                  Batal
-                </button>
-                <button
-                  type="submit"
-                  id="btnTolak-<%= report.id_laporan %>"
-                  disabled
-                  class="flex-1 bg-red-100 hover:bg-red-200 text-red-600 py-2.5 px-4 rounded-xl font-semibold text-center text-sm transition-all duration-200 shadow-md hover:shadow-lg"
-                >
-                  Tolak Verifikasi
-                </button>
-              </div>
-            </form>
+              <button type="button"
+                class="mt-4 w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white px-6 py-2.5 rounded-lg font-semibold transition-colors duration-200 shadow-sm hover:shadow-md"
+                onclick="openDetailModal('<%= report.id_laporan %>')">
+                Verifikasi
+              </button>
+            </div>
           </div>
-        </div>
-        <% }) %>
+
+          <div id="rejectClaimModal-<%= report.id_laporan %>"
+            class="hidden fixed inset-0 z-50 bg-black bg-opacity-60 flex items-center justify-center p-4">
+            <div
+              class="modal-content bg-white rounded-2xl shadow-2xl w-full max-w-sm transform scale-95 opacity-0 transition-all duration-300">
+              <form id="rejectReportForm-<%= report.id_laporan %>" method="POST"
+                action="/admin/verifikasi/<%= report.id_laporan %>">
+                <input type="hidden" name="action" value="reject" />
+                <input type="hidden" id="alasanFinal-<%= report.id_laporan %>" name="alasan" />
+
+                <div class="flex justify-between items-center p-5 border-b border-gray-200">
+                  <h3 class="text-xl font-bold text-gray-800">
+                    Tolak Verifikasi
+                  </h3>
+                  <button type="button" onclick="closeRejectModal('<%= report.id_laporan %>')"
+                    class="text-gray-400 hover:text-gray-600 transition">
+                    <i class="fas fa-times fa-lg"></i>
+                  </button>
+                </div>
+
+                <div class="p-6 space-y-4">
+                  <p class="text-gray-700">
+                    Pilih alasan penolakan verifikasi laporan ini:
+                  </p>
+
+                  <div>
+                    <label for="alasan-select-<%= report.id_laporan %>"
+                      class="block text-sm font-medium text-gray-700 mb-1">Alasan Penolakan</label>
+                    <select id="alasan-select-<%= report.id_laporan %>" required
+                      class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-red-500 focus:border-red-500 transition"
+                      onchange="handleRejectReasonChange('<%= report.id_laporan %>')">
+                      <option value="" disabled selected>
+                        Pilih salah satu alasan
+                      </option>
+                      <option value="Data tidak valid">Data tidak valid</option>
+                      <option value="Bukti foto tidak jelas">
+                        Bukti foto tidak jelas
+                      </option>
+                      <option value="Informasi tidak lengkap">
+                        Informasi tidak lengkap
+                      </option>
+                      <option value="lainnya">Alasan lainnya</option>
+                    </select>
+                  </div>
+
+                  <div id="alasanLainnyaContainer-<%= report.id_laporan %>" class="hidden">
+                    <label for="alasanLainnya-textarea-<%= report.id_laporan %>"
+                      class="block text-sm font-medium text-gray-700 mb-1">Alasan Lainnya (Detail)</label>
+                    <textarea id="alasanLainnya-textarea-<%= report.id_laporan %>" rows="3"
+                      class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-red-500 focus:border-red-500 transition"
+                      placeholder="Jelaskan alasan penolakan secara rinci"></textarea>
+                  </div>
+                </div>
+
+                <div class="flex justify-end items-center p-5 border-t border-gray-200 space-x-3">
+                  <button type="button" onclick="closeRejectModal('<%= report.id_laporan %>')"
+                    class="flex-1 bg-grey-100 hover:bg-grey-200 text-grey-600 py-2.5 px-4 rounded-xl font-semibold text-center text-sm transition-all duration-200 shadow-md hover:shadow-lg">
+                    Batal
+                  </button>
+                  <button type="submit" id="btnTolak-<%= report.id_laporan %>" disabled
+                    class="flex-1 bg-red-100 hover:bg-red-200 text-red-600 py-2.5 px-4 rounded-xl font-semibold text-center text-sm transition-all duration-200 shadow-md hover:shadow-lg">
+                    Tolak Verifikasi
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+          <% }) %>
       </div>
     </div>
 
-    <div
-      id="detailModal"
-      class="hidden fixed inset-0 z-50 bg-black bg-opacity-60 flex items-center justify-center p-4"
-    >
+    <div id="detailModal" class="hidden fixed inset-0 z-50 bg-black bg-opacity-60 flex items-center justify-center p-4">
       <div
-        class="modal-content bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col transform scale-95 opacity-0 transition-all duration-300"
-      >
-        <div
-          class="flex justify-between items-center p-4 border-b border-gray-200 flex-shrink-0"
-        >
+        class="modal-content bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col transform scale-95 opacity-0 transition-all duration-300">
+        <div class="flex justify-between items-center p-4 border-b border-gray-200 flex-shrink-0">
           <h3 class="text-xl font-semibold text-gray-800">Detail Laporan</h3>
-          <button
-            type="button"
-            onclick="closeDetailModal()"
-            class="text-gray-400 hover:text-gray-600 transition"
-          >
+          <button type="button" onclick="closeDetailModal()" class="text-gray-400 hover:text-gray-600 transition">
             <i class="fas fa-times fa-lg"></i>
           </button>
         </div>
 
         <div class="p-6 overflow-y-auto">
           <div class="grid grid-cols-1 md:grid-cols-5 gap-8">
-            <div
-              class="md:col-span-2 bg-gray-50 rounded-xl flex items-center justify-center p-4"
-            >
-              <img
-                id="detail-foto"
-                src=""
-                alt="Foto Barang"
-                class="max-h-[70vh] w-auto object-contain rounded-md"
-              />
+            <div class="md:col-span-2 bg-gray-50 rounded-xl flex items-center justify-center p-4">
+              <img id="detail-foto" src="" alt="Foto Barang" class="max-h-[70vh] w-auto object-contain rounded-md" />
             </div>
 
             <div class="md:col-span-3 flex flex-col">
               <div class="mb-3">
-                <span
-                  id="detail-status-badge"
-                  class="px-3 py-1.5 rounded-full text-sm font-semibold"
-                ></span>
+                <span id="detail-status-badge" class="px-3 py-1.5 rounded-full text-sm font-semibold"></span>
               </div>
 
-              <h2
-                id="detail-nama-barang"
-                class="text-3xl font-bold text-gray-900 mb-5"
-              ></h2>
+              <h2 id="detail-nama-barang" class="text-3xl font-bold text-gray-900 mb-5"></h2>
 
               <div class="space-y-4 border-y border-gray-200 py-5">
                 <div class="flex items-start">
-                  <i
-                    class="fas fa-map-marker-alt text-red-500 mt-1 w-5 text-center"
-                  ></i>
+                  <i class="fas fa-map-marker-alt text-red-500 mt-1 w-5 text-center"></i>
                   <div class="ml-4">
                     <p class="text-sm text-gray-500">Lokasi Ditemukan</p>
-                    <p
-                      id="detail-lokasi"
-                      class="font-semibold text-gray-800"
-                    ></p>
+                    <p id="detail-lokasi" class="font-semibold text-gray-800"></p>
                   </div>
                 </div>
                 <div class="flex items-start">
-                  <i
-                    class="fas fa-calendar-alt text-blue-500 mt-1 w-5 text-center"
-                  ></i>
+                  <i class="fas fa-calendar-alt text-blue-500 mt-1 w-5 text-center"></i>
                   <div class="ml-4">
                     <p class="text-sm text-gray-500">Tanggal Dilaporkan</p>
-                    <p
-                      id="detail-tanggal"
-                      class="font-semibold text-gray-800"
-                    ></p>
+                    <p id="detail-tanggal" class="font-semibold text-gray-800"></p>
                   </div>
                 </div>
                 <div class="flex items-start">
-                  <i
-                    class="fas fa-tag text-purple-500 mt-1 w-5 text-center"
-                  ></i>
+                  <i class="fas fa-tag text-purple-500 mt-1 w-5 text-center"></i>
                   <div class="ml-4">
                     <p class="text-sm text-gray-500">Jenis Laporan</p>
-                    <p
-                      id="detail-jenis"
-                      class="font-semibold text-gray-800"
-                    ></p>
+                    <p id="detail-jenis" class="font-semibold text-gray-800"></p>
                   </div>
                 </div>
               </div>
@@ -262,18 +177,11 @@
                 <h4 class="text-base font-semibold text-gray-800 mb-2">
                   Deskripsi Barang
                 </h4>
-                <p
-                  id="detail-deskripsi"
-                  class="text-gray-600 leading-relaxed"
-                ></p>
+                <p id="detail-deskripsi" class="text-gray-600 leading-relaxed"></p>
               </div>
 
-              <div
-                class="mt-8 p-4 bg-yellow-50 border border-yellow-200 rounded-xl"
-              >
-                <h4
-                  class="text-base font-bold text-yellow-800 mb-3 flex items-center"
-                >
+              <div class="mt-8 p-4 bg-yellow-50 border border-yellow-200 rounded-xl">
+                <h4 class="text-base font-bold text-yellow-800 mb-3 flex items-center">
                   <i class="fas fa-user-circle mr-2"></i>
                   Informasi Pelapor
                 </h4>
@@ -291,22 +199,14 @@
         </div>
 
         <div
-          class="flex justify-end items-center p-4 border-t border-gray-200 bg-gray-50 rounded-b-2xl flex-shrink-0 space-x-3"
-        >
-          <button
-            id="detail-reject-btn"
-            type="button"
-            class="bg-red-100 hover:bg-red-200 text-red-600 py-2.5 px-4 rounded-xl font-semibold text-center text-sm transition-all duration-200 shadow-md hover:shadow-lg"
-          >
+          class="flex justify-end items-center p-4 border-t border-gray-200 bg-gray-50 rounded-b-2xl flex-shrink-0 space-x-3">
+          <button id="detail-reject-btn" type="button"
+            class="bg-red-100 hover:bg-red-200 text-red-600 py-2.5 px-4 rounded-xl font-semibold text-center text-sm transition-all duration-200 shadow-md hover:shadow-lg">
             Tolak Verifikasi
           </button>
           <form id="detail-approve-form" method="POST" action="">
-            <button
-              name="action"
-              value="approve"
-              type="submit"
-              class="flex-1 bg-green-100 hover:bg-green-200 text-green-600 py-2.5 px-4 rounded-xl font-semibold text-center text-sm transition-all duration-200 shadow-md hover:shadow-lg"
-            >
+            <button name="action" value="approve" type="submit"
+              class="flex-1 bg-green-100 hover:bg-green-200 text-green-600 py-2.5 px-4 rounded-xl font-semibold text-center text-sm transition-all duration-200 shadow-md hover:shadow-lg">
               Setuju
             </button>
           </form>
@@ -318,12 +218,11 @@
     </script>
 
     <script>
-      
       const reportsData = JSON.parse(
         document.getElementById("reports-data").textContent
       );
 
-      
+
       function formatDate(dateString) {
         const options = {
           year: "numeric",
@@ -334,7 +233,6 @@
         return date.toLocaleDateString("id-ID", options);
       }
 
-      
       function getStatusClasses(status) {
         switch (status) {
           case "pending":
@@ -360,7 +258,6 @@
         }
       }
 
-      
       function openDetailModal(id_laporan) {
         const report = reportsData.find((r) => r.id_laporan == id_laporan);
         const modal = document.getElementById("detailModal");
@@ -368,7 +265,6 @@
 
         if (!report) return;
 
-        
         document.getElementById("detail-nama-barang").textContent =
           report.nama_barang;
         document.getElementById("detail-lokasi").textContent = report.lokasi;
@@ -388,24 +284,20 @@
         document.getElementById("detail-email").textContent =
           report.User.email || "-";
 
-        
         const statusBadge = document.getElementById("detail-status-badge");
         const status = getStatusClasses(report.status);
         statusBadge.textContent = status.text;
         statusBadge.className = `px-3 py-1.5 rounded-full text-sm font-semibold ${status.class}`;
 
-        
         const approveForm = document.getElementById("detail-approve-form");
         approveForm.action = `/admin/verifikasi/${id_laporan}`;
 
         const rejectButton = document.getElementById("detail-reject-btn");
         rejectButton.onclick = () => {
-          
           closeDetailModal();
           openRejectModal(id_laporan);
         };
 
-        
         modal.classList.remove("hidden");
         setTimeout(() => {
           modalContent.classList.remove("scale-95", "opacity-0");
@@ -421,13 +313,11 @@
         }, 300);
       }
 
-      
-
       function openRejectModal(id_laporan) {
         const modal = document.getElementById(`rejectClaimModal-${id_laporan}`);
         const modalContent = modal.querySelector(".modal-content");
         modal.classList.remove("hidden");
-        
+
         const form = document.getElementById(`rejectReportForm-${id_laporan}`);
         form.reset();
         handleRejectReasonChange(id_laporan);
@@ -488,5 +378,6 @@
         }
       }
     </script>
-  </body>
+</body>
+
 </html>

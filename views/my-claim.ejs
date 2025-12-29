@@ -1,166 +1,131 @@
 <!DOCTYPE html>
 <html lang="id">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Laporan Diklaim</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
-      rel="stylesheet"
-    />
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
-    />
-    <style>
-      body {
-        font-family: "Inter", sans-serif;
-      }
-      .gradient-bg {
-        background-image: linear-gradient(to right, #22c55e, #16a34a);
-      }
 
-      
-      .modal-content {
-        transition: transform 0.3s ease-out, opacity 0.3s ease-out;
-        transform: scale(0.95);
-        opacity: 0;
-      }
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Laporan Diklaim</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <style>
+    body {
+      font-family: "Inter", sans-serif;
+    }
 
-      .modal-content.open {
-        transform: scale(1);
-        opacity: 1;
-      }
+    .gradient-bg {
+      background-image: linear-gradient(to right, #22c55e, #16a34a);
+    }
 
-      .modal-content.close {
-        transform: scale(0.95);
-        opacity: 0;
-      }
-    </style>
-  </head>
-  <body class="bg-gray-100">
-    <%- include('components/navbar') %>
+    .modal-content {
+      transition: transform 0.3s ease-out, opacity 0.3s ease-out;
+      transform: scale(0.95);
+      opacity: 0;
+    }
+
+    .modal-content.open {
+      transform: scale(1);
+      opacity: 1;
+    }
+
+    .modal-content.close {
+      transform: scale(0.95);
+      opacity: 0;
+    }
+  </style>
+</head>
+
+<body class="bg-gray-100">
+  <%- include('components/navbar') %>
 
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       <h2 class="text-3xl font-semibold text-gray-800 mb-6">Laporan Diklaim</h2>
 
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        <% reports.forEach(report => { %>
-        <div
-          class="relative bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-sm hover:shadow-xl transition-shadow duration-300"
-        >
-        <div class="absolute top-4 left-4 z-10">
-                <% if (report.jenis_laporan === "Penemuan") { %>
-                  <span
-                    class="bg-lime-500 text-lime-800 text-xs font-bold p-1 rounded"
-                    >Penemuan</span
-                  >
+        <% reports.forEach(report=> { %>
+          <div
+            class="relative bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-sm hover:shadow-xl transition-shadow duration-300">
+            <div class="absolute top-4 left-4 z-10">
+              <% if (report.jenis_laporan==="Penemuan" ) { %>
+                <span class="bg-lime-500 text-lime-800 text-xs font-bold p-1 rounded">Penemuan</span>
                 <% } else { %>
-                  <span
-                    class="bg-yellow-400 text-yeloow-800 text-xs font-bold p-1 rounded"
-                    >Kehilangan</span
-                  >
-                <% } %>
-              </div>
-          <div class="relative">
-            <img
-              src="/uploads/<%= report.foto_barang %>"
-              alt="<%= report.nama_barang %>"
-              class="w-full h-48 object-cover"
-            />
-          </div>
-
-          <div class="p-6">
-            <div class="flex items-start justify-between mb-3">
-              <h3 class="text-xl font-bold text-gray-900">
-                <%= report.nama_barang %>
-              </h3>
+                  <span class="bg-yellow-400 text-yeloow-800 text-xs font-bold p-1 rounded">Kehilangan</span>
+                  <% } %>
+            </div>
+            <div class="relative">
+              <img src="/uploads/<%= report.foto_barang %>" alt="<%= report.nama_barang %>"
+                class="w-full h-48 object-cover" />
             </div>
 
-            <div class="space-y-3 mb-5">
-                <% 
-
-    let statusClass = 'text-gray-500';
-    let iconColorClass = 'text-gray-500'; 
-
-    if (report.Claim.status === 'Waiting for approval') {
-        statusClass = 'text-yellow-600 font-medium';
-        iconColorClass = 'text-yellow-500';
-    } else if (report.Claim.status === 'Rejected') {
-        statusClass = 'text-red-600 font-medium';
-        iconColorClass = 'text-red-500';
-    } else if (report.Claim.status === 'Done') {
-        statusClass = 'text-green-600 font-medium';
-        iconColorClass = 'text-green-500';
-    }
-%>
-
-<div class="flex items-center text-sm <%= statusClass %>">
-    <i class="fas fa-check-circle w-4 h-4 mr-2 <%= iconColorClass %>"></i>
-    <%= report.Claim.status %>
-</div>
-              <div class="flex items-center text-sm text-gray-500">
-                <i class="fas fa-map-marker-alt w-4 h-4 mr-2 text-red-500"></i>
-                <%= report.lokasi %>
+            <div class="p-6">
+              <div class="flex items-start justify-between mb-3">
+                <h3 class="text-xl font-bold text-gray-900">
+                  <%= report.nama_barang %>
+                </h3>
               </div>
-              <div class="flex items-center text-sm text-gray-500">
-                <i class="fas fa-user-circle w-4 h-4 mr-2 text-blue-500"></i>
-                Ditemukan oleh: <%= report.User.nama %>
-              </div>
-              <% if (report.Claim.alasan) { %>
-              <div class="flex items-center text-sm text-gray-500">
-                <i class="fas fa-info-circle w-4 h-4 mr-2 text-red-500"></i>
-                Alasan Penolakan: <%= report.Claim.alasan %>
-              </div>
-              <% } %>
-            </div>
 
-            <p class="text-gray-600 text-sm mb-4 line-clamp-3">
-              <%= report.deskripsi %>
-            </p>
+              <div class="space-y-3 mb-5">
+                <% let statusClass='text-gray-500' ; let iconColorClass='text-gray-500' ; if
+                  (report.Claim.status==='Waiting for approval' ) { statusClass='text-yellow-600 font-medium' ;
+                  iconColorClass='text-yellow-500' ; } else if (report.Claim.status==='Rejected' ) {
+                  statusClass='text-red-600 font-medium' ; iconColorClass='text-red-500' ; } else if
+                  (report.Claim.status==='Done' ) { statusClass='text-green-600 font-medium' ;
+                  iconColorClass='text-green-500' ; } %>
 
-            <div class="flex gap-4">
-              <button
-                type="button"
-                class="flex-1 bg-green-500 hover:bg-green-200 text-white py-2.5 px-4 rounded-xl font-semibold text-sm transition-all duration-200 shadow-md hover:shadow-lg"
-                data-report="<%- encodeURIComponent(JSON.stringify(report)) %>"
-                onclick="openDetailModal(this.dataset.report)"
-              >
-                <i class="fas fa-eye mr-2"></i>Detail
-              </button>
-              <% if (report.Claim.status === "Waiting for approval") { %>
-                <button
-                type="button"
-                class="flex-1 bg-red-500 hover:bg-red-200 text-white py-2.5 px-4 rounded-xl font-semibold text-sm transition-all duration-200 shadow-md hover:shadow-lg"
-                data-id="<%= report.id_laporan %>"
-                data-nama="<%= report.nama_barang %>"
-                onclick="openCancelModal(this)"
-              >
-                <i class="fas fa-trash-alt mr-2"></i>Batal Klaim
-              </button>
-              <% } else { %>
-              <button
-                type="button"
-                class="flex-1 bg-gray-300 text-gray-600 py-2.5 px-4 rounded-xl font-semibold text-sm cursor-not-allowed"
-                disabled
-              >
-                <i class="fas fa-trash-alt mr-2"></i>Batal Klaim
-              </button>
-              <% } %>
+                  <div class="flex items-center text-sm <%= statusClass %>">
+                    <i class="fas fa-check-circle w-4 h-4 mr-2 <%= iconColorClass %>"></i>
+                    <%= report.Claim.status %>
+                  </div>
+                  <div class="flex items-center text-sm text-gray-500">
+                    <i class="fas fa-map-marker-alt w-4 h-4 mr-2 text-red-500"></i>
+                    <%= report.lokasi %>
+                  </div>
+                  <div class="flex items-center text-sm text-gray-500">
+                    <i class="fas fa-user-circle w-4 h-4 mr-2 text-blue-500"></i>
+                    Ditemukan oleh: <%= report.User.nama %>
+                  </div>
+                  <% if (report.Claim.alasan) { %>
+                    <div class="flex items-center text-sm text-gray-500">
+                      <i class="fas fa-info-circle w-4 h-4 mr-2 text-red-500"></i>
+                      Alasan Penolakan: <%= report.Claim.alasan %>
+                    </div>
+                    <% } %>
+              </div>
+
+              <p class="text-gray-600 text-sm mb-4 line-clamp-3">
+                <%= report.deskripsi %>
+              </p>
+
+              <div class="flex gap-4">
+                <button type="button"
+                  class="flex-1 bg-green-500 hover:bg-green-200 text-white py-2.5 px-4 rounded-xl font-semibold text-sm transition-all duration-200 shadow-md hover:shadow-lg"
+                  data-report="<%- encodeURIComponent(JSON.stringify(report)) %>"
+                  onclick="openDetailModal(this.dataset.report)">
+                  <i class="fas fa-eye mr-2"></i>Detail
+                </button>
+                <% if (report.Claim.status==="Waiting for approval" ) { %>
+                  <button type="button"
+                    class="flex-1 bg-red-500 hover:bg-red-200 text-white py-2.5 px-4 rounded-xl font-semibold text-sm transition-all duration-200 shadow-md hover:shadow-lg"
+                    data-id="<%= report.id_laporan %>" data-nama="<%= report.nama_barang %>"
+                    onclick="openCancelModal(this)">
+                    <i class="fas fa-trash-alt mr-2"></i>Batal Klaim
+                  </button>
+                  <% } else { %>
+                    <button type="button"
+                      class="flex-1 bg-gray-300 text-gray-600 py-2.5 px-4 rounded-xl font-semibold text-sm cursor-not-allowed"
+                      disabled>
+                      <i class="fas fa-trash-alt mr-2"></i>Batal Klaim
+                    </button>
+                    <% } %>
+              </div>
             </div>
           </div>
-        </div>
-        <% }) %>
+          <% }) %>
       </div>
     </div>
 
-    <div
-      id="cancelModal"
-      class="hidden fixed inset-0 z-50 bg-black bg-opacity-60 flex items-center justify-center p-4"
-      role="dialog"
-      tabindex="-1"
-    >
+    <div id="cancelModal" class="hidden fixed inset-0 z-50 bg-black bg-opacity-60 flex items-center justify-center p-4"
+      role="dialog" tabindex="-1">
       <div class="modal-content bg-white rounded-xl shadow-md w-full max-w-sm">
         <form id="cancelForm" method="POST">
           <div class="p-6 space-y-4">
@@ -170,21 +135,13 @@
             </p>
           </div>
 
-          <div
-            class="flex justify-end items-center p-5 border-t border-gray-200 space-x-3"
-          >
-            <button
-              type="button"
-              onclick="closeCancelModal()"
-              class="flex-1 bg-grey-300 hover:bg-grey-400 text-grey-600 py-2.5 px-4 rounded-xl font-semibold text-sm transition-all duration-200 shadow-md hover:shadow-lg"
-            >
+          <div class="flex justify-end items-center p-5 border-t border-gray-200 space-x-3">
+            <button type="button" onclick="closeCancelModal()"
+              class="flex-1 bg-grey-300 hover:bg-grey-400 text-grey-600 py-2.5 px-4 rounded-xl font-semibold text-sm transition-all duration-200 shadow-md hover:shadow-lg">
               Tidak
             </button>
-            <button
-              type="submit"
-              id="btnSubmitCancel"
-              class="flex-1 bg-red-100 hover:bg-red-200 text-red-600 py-2.5 px-4 rounded-xl font-semibold text-sm transition-all duration-200 shadow-md hover:shadow-lg"
-            >
+            <button type="submit" id="btnSubmitCancel"
+              class="flex-1 bg-red-100 hover:bg-red-200 text-red-600 py-2.5 px-4 rounded-xl font-semibold text-sm transition-all duration-200 shadow-md hover:shadow-lg">
               Ya, Batalkan Klaim
             </button>
           </div>
@@ -192,87 +149,48 @@
       </div>
     </div>
 
-    <div
-      id="detailModal"
-      class="hidden fixed inset-0 z-50 bg-black bg-opacity-60 flex items-center justify-center p-4"
-    >
-      <div
-        class="modal-content bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col"
-      >
-        <div
-          class="flex justify-between items-center p-4 border-b border-gray-200 flex-shrink-0"
-        >
+    <div id="detailModal" class="hidden fixed inset-0 z-50 bg-black bg-opacity-60 flex items-center justify-center p-4">
+      <div class="modal-content bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col">
+        <div class="flex justify-between items-center p-4 border-b border-gray-200 flex-shrink-0">
           <h3 class="text-xl font-semibold text-gray-800">Detail Laporan</h3>
-          <button
-            type="button"
-            onclick="closeDetailModal()"
-            class="text-gray-400 hover:text-gray-600 transition"
-          >
+          <button type="button" onclick="closeDetailModal()" class="text-gray-400 hover:text-gray-600 transition">
             <i class="fas fa-times fa-lg"></i>
           </button>
         </div>
 
         <div class="p-6 overflow-y-auto">
           <div class="grid grid-cols-1 md:grid-cols-5 gap-8">
-            <div
-              class="md:col-span-2 bg-slate-100 rounded-xl flex items-center justify-center p-4"
-            >
-              <img
-                id="detail-foto"
-                src=""
-                alt="Foto Barang"
-                class="max-h-[70vh] w-auto object-contain rounded-md"
-              />
+            <div class="md:col-span-2 bg-slate-100 rounded-xl flex items-center justify-center p-4">
+              <img id="detail-foto" src="" alt="Foto Barang" class="max-h-[70vh] w-auto object-contain rounded-md" />
             </div>
 
             <div class="md:col-span-3 flex flex-col">
               <div class="mb-3">
-                <span
-                  id="detail-status-badge"
-                  class="px-3 py-1.5 rounded-full text-sm font-semibold"
-                ></span>
+                <span id="detail-status-badge" class="px-3 py-1.5 rounded-full text-sm font-semibold"></span>
               </div>
 
-              <h2
-                id="detail-nama-barang"
-                class="text-3xl font-bold text-gray-900 mb-5"
-              ></h2>
+              <h2 id="detail-nama-barang" class="text-3xl font-bold text-gray-900 mb-5"></h2>
 
               <div class="space-y-4 border-y border-gray-200 py-5">
                 <div class="flex items-start">
-                  <i
-                    class="fas fa-map-marker-alt text-red-500 mt-1 w-5 text-center"
-                  ></i>
+                  <i class="fas fa-map-marker-alt text-red-500 mt-1 w-5 text-center"></i>
                   <div class="ml-4">
                     <p class="text-sm text-gray-500">Lokasi Ditemukan</p>
-                    <p
-                      id="detail-lokasi"
-                      class="font-semibold text-gray-800"
-                    ></p>
+                    <p id="detail-lokasi" class="font-semibold text-gray-800"></p>
                   </div>
                 </div>
                 <div class="flex items-start">
-                  <i
-                    class="fas fa-calendar-alt text-blue-500 mt-1 w-5 text-center"
-                  ></i>
+                  <i class="fas fa-calendar-alt text-blue-500 mt-1 w-5 text-center"></i>
                   <div class="ml-4">
                     <p class="text-sm text-gray-500">Tanggal Dilaporkan</p>
-                    <p
-                      id="detail-tanggal"
-                      class="font-semibold text-gray-800"
-                    ></p>
+                    <p id="detail-tanggal" class="font-semibold text-gray-800"></p>
                   </div>
                 </div>
                 <div class="flex items-start">
-                  <i
-                    class="fas fa-tag text-purple-500 mt-1 w-5 text-center"
-                  ></i>
+                  <i class="fas fa-tag text-purple-500 mt-1 w-5 text-center"></i>
                   <div class="ml-4">
                     <p class="text-sm text-gray-500">Jenis Laporan</p>
-                    <p
-                      id="detail-jenis"
-                      class="font-semibold text-gray-800"
-                    ></p>
+                    <p id="detail-jenis" class="font-semibold text-gray-800"></p>
                   </div>
                 </div>
               </div>
@@ -281,18 +199,11 @@
                 <h4 class="text-base font-semibold text-gray-800 mb-2">
                   Deskripsi Barang
                 </h4>
-                <p
-                  id="detail-deskripsi"
-                  class="text-gray-600 leading-relaxed"
-                ></p>
+                <p id="detail-deskripsi" class="text-gray-600 leading-relaxed"></p>
               </div>
 
-              <div
-                class="mt-8 p-4 bg-yellow-50 border border-yellow-200 rounded-xl"
-              >
-                <h4
-                  class="text-base font-bold text-yellow-800 mb-3 flex items-center"
-                >
+              <div class="mt-8 p-4 bg-yellow-50 border border-yellow-200 rounded-xl">
+                <h4 class="text-base font-bold text-yellow-800 mb-3 flex items-center">
                   <i class="fas fa-user-circle mr-2"></i>
                   Informasi Penemu
                 </h4>
@@ -308,22 +219,13 @@
           </div>
         </div>
 
-        <div
-          class="flex justify-end items-center p-4 border-t border-gray-200 bg-gray-50 rounded-b-2xl flex-shrink-0"
-        >
-          <a
-            id="waButton"
-            target="_blank"
-            type="button"
-            class="flex-1 bg-green-100 hover:bg-green-200 text-green-600 py-2.5 px-4 rounded-xl font-semibold text-center text-sm transition-all duration-200 shadow-md hover:shadow-lg"
-          >
+        <div class="flex justify-end items-center p-4 border-t border-gray-200 bg-gray-50 rounded-b-2xl flex-shrink-0">
+          <a id="waButton" target="_blank" type="button"
+            class="flex-1 bg-green-100 hover:bg-green-200 text-green-600 py-2.5 px-4 rounded-xl font-semibold text-center text-sm transition-all duration-200 shadow-md hover:shadow-lg">
             <i class="fab fa-whatsapp mr-2"></i>Hubungi Penemu
           </a>
-          <button
-            type="button"
-            onclick="closeDetailModal()"
-            class="flex-1 bg-grey-100 hover:bg-grey-200 text-grey-600 py-2.5 px-4 rounded-xl font-semibold text-sm transition-all duration-200 shadow-md hover:shadow-lg"
-          >
+          <button type="button" onclick="closeDetailModal()"
+            class="flex-1 bg-grey-100 hover:bg-grey-200 text-grey-600 py-2.5 px-4 rounded-xl font-semibold text-sm transition-all duration-200 shadow-md hover:shadow-lg">
             Tutup
           </button>
         </div>
@@ -332,7 +234,6 @@
 
     <script src="https://unpkg.com/preline@^2/dist/preline.js"></script>
     <script>
-      
       function openCancelModal(button) {
         const id = button.dataset.id;
         const nama = button.dataset.nama;
@@ -340,11 +241,9 @@
         const modalContent = modal.querySelector(".modal-content");
 
         document.getElementById("modalItemName").textContent = nama;
-        
         document.getElementById("cancelForm").action =
           "/mahasiswa/my-claim/cancel/" + id;
 
-        
         modal.classList.remove("hidden");
         modalContent.classList.remove("close");
         modalContent.classList.add("open");
@@ -354,18 +253,15 @@
         const modal = document.getElementById("cancelModal");
         const modalContent = modal.querySelector(".modal-content");
 
-        
         modalContent.classList.remove("open");
         modalContent.classList.add("close");
 
-        
         setTimeout(() => {
           modal.classList.add("hidden");
-          modalContent.classList.remove("close"); 
+          modalContent.classList.remove("close");
         }, 300);
       }
 
-  
       function getStatusBadge(status) {
         let colorClass = "";
         if (status.includes("Waiting for approval")) {
@@ -382,7 +278,6 @@
         return { text: status, class: colorClass };
       }
 
-     
       function formatDate(dateString) {
         if (!dateString) return "-";
         try {
@@ -394,7 +289,6 @@
         }
       }
 
-      
       function openDetailModal(reportData) {
         const report = JSON.parse(decodeURIComponent(reportData));
         const modal = document.getElementById("detailModal");
@@ -443,7 +337,6 @@
             .classList.remove("opacity-50", "pointer-events-none");
         }
 
-        
         modal.classList.remove("hidden");
         modalContent.classList.remove("close");
         modalContent.classList.add("open");
@@ -456,12 +349,12 @@
         modalContent.classList.remove("open");
         modalContent.classList.add("close");
 
-        
         setTimeout(() => {
           modal.classList.add("hidden");
           modalContent.classList.remove("close");
         }, 300);
       }
     </script>
-  </body>
+</body>
+
 </html>
